@@ -1,4 +1,5 @@
 const paymentQueries = require("../db/queries/paymentQueries")
+const pool = require("../db/db")
 
 const createOfflinePayment = async (data) => {
 
@@ -26,7 +27,76 @@ const getPaymentsByFlat = async (flatId) => {
 
 }
 
+
+
+
+//resident part
+
+
+
+const paySubscription = async (userId, month, year) => {
+
+  const user = await pool.query(
+    `SELECT flat_id FROM users WHERE id=$1`,
+    [userId]
+  )
+
+  const flatId = user.rows[0]?.flat_id
+
+  if(!flatId){
+    throw new Error("User not assigned to flat")
+  }
+
+  const record = await pool.query(
+    `
+    SELECT amount
+    FROM monthly_records
+    WHERE flat_id=$1
+    AND month=$2
+    AND year=$3
+    `,
+    [flatId,month,year]
+  )
+
+  if(!record.rows[0]){
+    throw new Error("Monthly record not found for this period")
+  }
+
+  const amount = record.rows[0].amount
+
+  await paymentQueries.createPayment(flatId,month,year,amount)
+
+  await paymentQueries.markSubscriptionPaid(flatId,month,year)
+
+  // Fetch user and flat details for receipt
+  const userDetailsResult = await pool.query(
+    `SELECT u.name, u.email, f.flat_number, f.flat_type 
+     FROM users u 
+     JOIN flats f ON u.flat_id = f.id 
+     WHERE u.id = $1`,
+    [userId]
+  )
+
+  const userDetails = userDetailsResult.rows[0]
+
+  return {
+    success:true,
+    amount,
+    month,
+    year,
+    userName: userDetails?.name,
+    userEmail: userDetails?.email,
+    flatNumber: userDetails?.flat_number,
+    flatType: userDetails?.flat_type,
+    transactionId: `TXN-${Date.now()}`
+  }
+
+}
+
+
+
 module.exports = {
   createOfflinePayment,
-  getPaymentsByFlat
+  getPaymentsByFlat,
+    paySubscription
 }

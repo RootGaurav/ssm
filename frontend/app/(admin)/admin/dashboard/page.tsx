@@ -176,7 +176,7 @@ export default function DashboardPage(){
             </div>
           </div>
 
-          <div className="h-80 bg-gray-50 rounded-xl p-4">
+          {/* <div className="h-80 bg-gray-50 rounded-xl p-4">
             <Line
               data={chartData}
               options={{
@@ -230,7 +230,7 @@ export default function DashboardPage(){
                 }
               }}
             />
-          </div>
+          </div> */}
 
         </div>
 

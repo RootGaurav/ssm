@@ -73,7 +73,43 @@ const getPaymentsByFlat = async (flatId) => {
 
 }
 
+const createPayment = async (flatId, month, year, amount) => {
+
+  await pool.query(
+    `
+    INSERT INTO payments
+    (flat_id, month, year, amount, payment_mode, transaction_id, status)
+    VALUES ($1,$2,$3,$4,'online',$5,'success')
+    `,
+    [
+      flatId,
+      month,
+      year,
+      amount,
+      `MOCK-${Date.now()}`
+    ]
+  )
+
+}
+
+const markSubscriptionPaid = async (flatId, month, year) => {
+
+  await pool.query(
+    `
+    UPDATE monthly_records
+    SET status='paid'
+    WHERE flat_id=$1
+    AND month=$2
+    AND year=$3
+    `,
+    [flatId,month,year]
+  )
+
+}
+
 module.exports = {
+  createPayment,
+  markSubscriptionPaid,
   createOfflinePayment,
   getPaymentsByFlat
 }

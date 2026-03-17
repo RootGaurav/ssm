@@ -51,7 +51,49 @@ const getPaymentsByFlat = async (req, res) => {
 
 }
 
+
+
+
+
+//residents
+
+
+
+const paySubscription = async (req,res)=>{
+
+  try{
+
+    const {month,year} = req.body
+
+    const result = await paymentService.paySubscription(
+      req.user.id,
+      month,
+      year
+    )
+
+    res.json(result)
+
+  }catch(error){
+
+    let userMessage = "Payment processing failed. Please try again."
+
+    if(error.message && error.message.includes("User not assigned")){
+      userMessage = error.message
+    } else if(error.message && error.message.includes("Monthly record")){
+      userMessage = error.message
+    }
+
+    res.status(400).json({
+      error: userMessage
+    })
+
+  }
+
+}
+
+
 module.exports = {
   createOfflinePayment,
-  getPaymentsByFlat
+  getPaymentsByFlat,
+  paySubscription
 }

@@ -21,6 +21,8 @@ const authRoutes = require("./routes/authRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
 const profileRoutes = require("./routes/profileRoutes")
 const residentDashboardRoutes = require("./routes/residentDashboardRoutes")
+const residentSubscriptions = require("./routes/residentSubscriptions")
+const residentProfileRoutes = require("./routes/residentProfileRoutes")
 const app = express()
 
 app.use(cors({
@@ -91,6 +93,11 @@ app.get("/api/health", async (req, res) => {
   res.json({ message: "API running" })
 })
 
+// Razorpay keys endpoint
+app.get("/api/payments/razorpay-key", (req, res) => {
+  res.json({ key: process.env.RAZORPAY_KEY_ID })
+})
+
 app.use("/api/flats", flatRoutes)
 app.use("/api/residents", residentRoutes)
 app.use("/api/subscriptions", subscriptionRoutes)
@@ -101,7 +108,9 @@ app.use("/api/notifications", notificationRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/profile", profileRoutes)
+app.use("/api/resident/profile", residentProfileRoutes)
 app.use("/api/resident/dashboard", residentDashboardRoutes)
+app.use("/api/resident/subscriptions", residentSubscriptions)
 
 const PORT = process.env.PORT || 5000
 

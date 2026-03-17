@@ -20,4 +20,11 @@ router.get(
   paymentController.getPaymentsByFlat
 )
 
+
+router.post(
+  "/resident/pay",
+  authMiddleware,
+  paymentController.paySubscription
+)
+
 module.exports = router

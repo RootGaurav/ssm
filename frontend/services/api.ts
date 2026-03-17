@@ -1,4 +1,5 @@
 import DashboardPage from "@/app/(resident)/dashboard/page"
+import { profile } from "console"
 
 const API_URL = "http://localhost:5000/api"
 
@@ -495,7 +496,74 @@ export async function changePassword(data:any){
 
 
 
-// DashboardPage
+// Resident Profile (uses resident endpoints, does not affect admin routes)
+export async function getResidentProfile(){
+
+  const res = await fetch(`${API_URL}/resident/profile`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to fetch profile" }
+  }
+
+  return res.json()
+
+}
+
+export async function updateResidentProfile(data:any){
+
+  const res = await fetch(`${API_URL}/resident/profile`,{
+
+    method:"PUT",
+
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to update profile" }
+  }
+
+  return res.json()
+
+}
+
+export async function changeResidentPassword(data:any){
+
+  const res = await fetch(`${API_URL}/resident/profile/password`,{
+
+    method:"PUT",
+
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to change password" }
+  }
+
+  return res.json()
+
+}
+
+
+// Resident DashboardPage
 
 export async function getDashboardStats(){
 
@@ -530,3 +598,62 @@ export async function getResidentDashboard(){
   return res.json()
 
 }
+
+//resident subscriptions
+export async function getSubscriptions(){
+
+  const res = await fetch(`${API_URL}/resident/subscriptions`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  return res.json()
+
+}
+
+
+export async function getSubscriptionDetail(year:number,month:number){
+
+  const res = await fetch(
+    `${API_URL}/resident/subscriptions/${year}/${month}`,
+    {
+      headers:{
+        Authorization:`Bearer ${localStorage.getItem("token")}`
+      }
+    }
+  )
+
+  return res.json()
+
+}
+
+
+// payments/ paynow
+
+export async function getRazorpayKey(){
+  const res = await fetch(`${API_URL}/payments/razorpay-key`)
+  return res.json()
+}
+
+export async function paySubscription(month:number,year:number){
+
+  const res = await fetch(`${API_URL}/payments/resident/pay`,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+    body:JSON.stringify({
+      month,
+      year
+    })
+  })
+
+  return res.json()
+
+}
+
+//profile page
+
+
