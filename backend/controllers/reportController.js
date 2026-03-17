@@ -37,7 +37,27 @@ const getYearlyReport = async (req, res) => {
 
 }
 
+
+const getPendingPayments = async (req,res)=>{
+
+  try{
+
+    const data = await reportService.getPendingPayments()
+
+    res.json(data)
+
+  }catch(error){
+
+    res.status(500).json({
+      error:"Failed to fetch pending payments"
+    })
+
+  }
+
+}
+
 module.exports = {
   getMonthlyReport,
-  getYearlyReport
+  getYearlyReport,
+  getPendingPayments
 }

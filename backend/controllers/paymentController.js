@@ -11,8 +11,18 @@ const createOfflinePayment = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      error: "Failed to record payment"
+    let userMessage = "Failed to record payment"
+
+    if (error.message && error.message.includes("unique_payment")) {
+      userMessage = "Payment for this flat, month, and year already exists. Please check the records."
+    } else if (error.message && error.message.includes("violates unique constraint")) {
+      userMessage = "Payment for this flat, month, and year already exists. Please check the records."
+    } else if (error.message) {
+      userMessage = error.message
+    }
+
+    res.status(400).json({
+      error: userMessage
     })
 
   }
@@ -25,14 +35,16 @@ const getPaymentsByFlat = async (req, res) => {
 
   try {
 
-    const payments = await paymentService.getPaymentsByFlat(req.params.flatId)
+    const payments = await paymentService.getPaymentsByFlat(
+      req.params.flatId
+    )
 
     res.json(payments)
 
   } catch (error) {
 
-    res.status(500).json({
-      error: "Failed to fetch payments"
+    res.status(400).json({
+      error: error.message
     })
 
   }

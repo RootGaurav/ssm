@@ -1,19 +1,34 @@
-const monthlyQueries = require("../db/queries/monthlyRecordQueries")
+const queries = require("../db/queries/monthlyRecordQueries")
 
-const getMonthlyRecords = async () => {
-  return await monthlyQueries.getMonthlyRecords()
+const getMonthlyRecords = async (month, year) => {
+
+  if (!month || !year) {
+    throw new Error("Month and year required")
+  }
+
+  return await queries.getMonthlyRecords(month, year)
 }
 
-const createMonthlyRecord = async (data) => {
-  return await monthlyQueries.createMonthlyRecord(data)
+const generateMonthlyRecords = async (month, year) => {
+
+  if (!month || !year) {
+    throw new Error("Month and year required")
+  }
+
+  return await queries.generateMonthlyRecords(month, year)
 }
 
 const updateMonthlyRecord = async (id, status) => {
-  return await monthlyQueries.updateMonthlyRecord(id, status)
+
+  if (!["pending","paid"].includes(status)) {
+    throw new Error("Invalid status")
+  }
+
+  return await queries.updateMonthlyRecord(id, status)
 }
 
 module.exports = {
   getMonthlyRecords,
-  createMonthlyRecord,
+  generateMonthlyRecords,
   updateMonthlyRecord
 }

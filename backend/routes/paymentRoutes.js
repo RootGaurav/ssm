@@ -1,11 +1,23 @@
 const express = require("express")
-
 const router = express.Router()
 
 const paymentController = require("../controllers/paymentController")
 
-router.post("/offline", paymentController.createOfflinePayment)
+const authMiddleware = require("../middleware/authMiddleware")
+const adminMiddleware = require("../middleware/adminMiddleware")
 
-router.get("/:flatId", paymentController.getPaymentsByFlat)
+router.post(
+  "/offline",
+  authMiddleware,
+  adminMiddleware,
+  paymentController.createOfflinePayment
+)
+
+router.get(
+  "/:flatId",
+  authMiddleware,
+  adminMiddleware,
+  paymentController.getPaymentsByFlat
+)
 
 module.exports = router

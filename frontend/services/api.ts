@@ -203,3 +203,183 @@ export async function vacateFlat(flatId: number) {
   })
   return res.json()
 }
+
+
+
+// ===============================
+// SUBSCRIPTION PLANS
+// ===============================
+
+// GET SUBSCRIPTION PLANS
+export async function getSubscriptionPlans() {
+
+  const res = await fetch(`${API_URL}/subscriptions`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  return res.json()
+}
+
+
+// UPDATE SUBSCRIPTION PLAN
+export async function updateSubscriptionPlan(id:number, amount:number) {
+
+  const res = await fetch(`${API_URL}/subscriptions/${id}`, {
+
+    method: "PUT",
+
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+
+    body: JSON.stringify({
+      monthly_amount: amount
+    })
+
+  })
+
+  return res.json()
+
+}
+
+
+
+
+// ===============================
+// MONTHLY RECORDS
+// ===============================
+
+export async function getMonthlyRecords(month:number,year:number){
+
+  const res = await fetch(
+    `${API_URL}/monthly-records?month=${month}&year=${year}`,
+    {
+      headers:{
+        Authorization:`Bearer ${localStorage.getItem("token")}`
+      }
+    }
+  )
+
+  return res.json()
+}
+
+
+export async function generateMonthlyRecords(month:number,year:number){
+
+  const res = await fetch(
+    `${API_URL}/monthly-records/generate`,
+    {
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${localStorage.getItem("token")}`
+      },
+
+      body:JSON.stringify({month,year})
+    }
+  )
+
+  return res.json()
+}
+
+
+export async function markRecordPaid(id:number){
+
+  const res = await fetch(
+    `${API_URL}/monthly-records/${id}`,
+    {
+      method:"PUT",
+
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${localStorage.getItem("token")}`
+      },
+
+      body:JSON.stringify({
+        status:"paid"
+      })
+    }
+  )
+
+  return res.json()
+}
+
+
+// ===============================
+// PAYMENTS
+// ===============================
+
+export async function createOfflinePayment(data:any){
+
+  const res = await fetch(`${API_URL}/payments/offline`,{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  return res.json()
+
+}
+
+
+export async function getPaymentsByFlat(flatId:number){
+
+  const res = await fetch(`${API_URL}/payments/${flatId}`,{
+
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+
+  })
+
+  return res.json()
+
+}
+
+// REPORTS
+
+export async function getMonthlyReport(){
+
+  const res = await fetch(`${API_URL}/reports/monthly`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  return res.json()
+}
+
+
+export async function getYearlyReport(){
+
+  const res = await fetch(`${API_URL}/reports/yearly`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  return res.json()
+}
+
+
+export async function getPendingPayments(){
+
+  const res = await fetch(`${API_URL}/reports/pending`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  return res.json()
+}

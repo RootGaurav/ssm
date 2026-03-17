@@ -1,18 +1,21 @@
-const monthlyService = require("../services/monthlyRecordService")
+const service = require("../services/monthlyRecordService")
+
 
 // GET RECORDS
 const getMonthlyRecords = async (req, res) => {
 
   try {
 
-    const records = await monthlyService.getMonthlyRecords()
+    const { month, year } = req.query
+
+    const records = await service.getMonthlyRecords(month, year)
 
     res.json(records)
 
   } catch (error) {
 
     res.status(500).json({
-      error: "Failed to fetch monthly records"
+      error: error.message
     })
 
   }
@@ -20,19 +23,21 @@ const getMonthlyRecords = async (req, res) => {
 }
 
 
-// CREATE RECORD
-const createMonthlyRecord = async (req, res) => {
+// GENERATE RECORDS
+const generateMonthlyRecords = async (req, res) => {
 
   try {
 
-    const record = await monthlyService.createMonthlyRecord(req.body)
+    const { month, year } = req.body
 
-    res.status(201).json(record)
+    const records = await service.generateMonthlyRecords(month, year)
+
+    res.json(records)
 
   } catch (error) {
 
     res.status(500).json({
-      error: "Failed to create record"
+      error: error.message
     })
 
   }
@@ -48,14 +53,14 @@ const updateMonthlyRecord = async (req, res) => {
     const id = req.params.id
     const { status } = req.body
 
-    const record = await monthlyService.updateMonthlyRecord(id, status)
+    const record = await service.updateMonthlyRecord(id, status)
 
     res.json(record)
 
   } catch (error) {
 
     res.status(500).json({
-      error: "Failed to update record"
+      error: error.message
     })
 
   }
@@ -64,6 +69,6 @@ const updateMonthlyRecord = async (req, res) => {
 
 module.exports = {
   getMonthlyRecords,
-  createMonthlyRecord,
+  generateMonthlyRecords,
   updateMonthlyRecord
 }

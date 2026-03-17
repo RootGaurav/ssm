@@ -1,11 +1,28 @@
 const express = require("express")
-
 const router = express.Router()
 
-const subscriptionController = require("../controllers/subscriptionController")
+const controller = require("../controllers/subscriptionController")
 
-router.get("/", subscriptionController.getAllPlans)
+const authMiddleware = require("../middleware/authMiddleware")
+const adminMiddleware = require("../middleware/adminMiddleware")
 
-router.put("/:id", subscriptionController.updatePlan)
+
+// GET ALL PLANS
+router.get(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  controller.getAllPlans
+)
+
+
+// UPDATE PLAN
+router.put(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  controller.updatePlan
+)
+
 
 module.exports = router

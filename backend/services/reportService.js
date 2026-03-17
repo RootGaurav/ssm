@@ -8,7 +8,12 @@ const getYearlyReport = async () => {
   return await reportQueries.getYearlyReport()
 }
 
+const getPendingPayments = async () => {
+  return await reportQueries.getPendingPayments()
+}
+
 module.exports = {
   getMonthlyReport,
-  getYearlyReport
+  getYearlyReport,
+  getPendingPayments
 }

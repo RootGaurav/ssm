@@ -1,13 +1,31 @@
 const express = require("express")
-
 const router = express.Router()
 
-const monthlyController = require("../controllers/monthlyRecordController")
+const controller = require("../controllers/monthlyRecordController")
 
-router.get("/", monthlyController.getMonthlyRecords)
+const authMiddleware = require("../middleware/authMiddleware")
+const adminMiddleware = require("../middleware/adminMiddleware")
 
-router.post("/", monthlyController.createMonthlyRecord)
 
-router.put("/:id", monthlyController.updateMonthlyRecord)
+router.get(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  controller.getMonthlyRecords
+)
+
+router.post(
+  "/generate",
+  authMiddleware,
+  adminMiddleware,
+  controller.generateMonthlyRecords
+)
+
+router.put(
+  "/:id",
+  authMiddleware,
+  adminMiddleware,
+  controller.updateMonthlyRecord
+)
 
 module.exports = router

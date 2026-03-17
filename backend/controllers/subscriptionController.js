@@ -1,6 +1,7 @@
 const subscriptionService = require("../services/subscriptionService")
 
-// GET ALL
+
+// GET ALL SUBSCRIPTION PLANS
 const getAllPlans = async (req, res) => {
 
   try {
@@ -11,6 +12,8 @@ const getAllPlans = async (req, res) => {
 
   } catch (error) {
 
+    console.error(error)
+
     res.status(500).json({
       error: "Failed to fetch subscription plans"
     })
@@ -18,6 +21,7 @@ const getAllPlans = async (req, res) => {
   }
 
 }
+
 
 // UPDATE PLAN
 const updatePlan = async (req, res) => {
@@ -27,19 +31,25 @@ const updatePlan = async (req, res) => {
     const id = req.params.id
     const { monthly_amount } = req.body
 
-    const plan = await subscriptionService.updatePlan(id, monthly_amount)
+    const plan = await subscriptionService.updatePlan(
+      id,
+      monthly_amount
+    )
 
     res.json(plan)
 
   } catch (error) {
 
-    res.status(500).json({
-      error: "Failed to update subscription plan"
+    console.error(error)
+
+    res.status(400).json({
+      error: error.message || "Failed to update subscription plan"
     })
 
   }
 
 }
+
 
 module.exports = {
   getAllPlans,
