@@ -161,8 +161,10 @@ export default function FlatModal({flat,onClose,onSuccess}:any){
             onChange={(e)=>setType(e.target.value)}
             required
           >
+            <option value="1BHK">1BHK</option>
             <option value="2BHK">2BHK</option>
             <option value="3BHK">3BHK</option>
+            <option value="4BHK">4BHK</option>
           </select>
 
           <div className="flex justify-end gap-3 mt-6">

@@ -5,7 +5,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
   const [sortField,setSortField] = useState("flat_number")
   const [sortOrder,setSortOrder] = useState("asc")
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize] = useState(2) // Items per page
+  const [pageSize] = useState(5) // Items per page
 
   function handleSort(field:string){
     if(field === sortField){
