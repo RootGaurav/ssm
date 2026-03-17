@@ -1,6 +1,5 @@
 const notificationService = require("../services/notificationService")
 
-// GET NOTIFICATIONS
 const getNotifications = async (req, res) => {
 
   try {
@@ -19,8 +18,6 @@ const getNotifications = async (req, res) => {
 
 }
 
-
-// CREATE NOTIFICATION
 const createNotification = async (req, res) => {
 
   try {
@@ -31,8 +28,8 @@ const createNotification = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({
-      error: "Failed to create notification"
+    res.status(400).json({
+      error: error.message
     })
 
   }

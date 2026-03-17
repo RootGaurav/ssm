@@ -19,7 +19,7 @@ const reportRoutes = require("./routes/reportRoutes")
 const notificationRoutes = require("./routes/notificationRoutes")
 const authRoutes = require("./routes/authRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
-
+const profileRoutes = require("./routes/profileRoutes")
 const app = express()
 
 app.use(cors({
@@ -99,7 +99,7 @@ app.use("/api/reports", reportRoutes)
 app.use("/api/notifications", notificationRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/dashboard", dashboardRoutes)
-
+app.use("/api/profile", profileRoutes)
 
 const PORT = process.env.PORT || 5000
 

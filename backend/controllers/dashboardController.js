@@ -1,19 +1,17 @@
-const dashboardService = require("../services/dashboardService")
+const service = require("../services/dashboardService")
 
-const getAdminDashboardStats = async (req, res) => {
+const getDashboardStats = async (req,res)=>{
 
-  try {
+  try{
 
-    const stats = await dashboardService.getAdminDashboardStats()
+    const data = await service.getDashboardStats()
 
-    res.json(stats)
+    res.json(data)
 
-  } catch (error) {
-
-    console.error(error)
+  }catch(error){
 
     res.status(500).json({
-      error: "Failed to fetch dashboard stats"
+      error:"Failed to fetch dashboard stats"
     })
 
   }
@@ -21,5 +19,5 @@ const getAdminDashboardStats = async (req, res) => {
 }
 
 module.exports = {
-  getAdminDashboardStats
+  getDashboardStats
 }

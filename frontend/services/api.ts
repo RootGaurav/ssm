@@ -1,3 +1,5 @@
+import DashboardPage from "@/app/(resident)/dashboard/page"
+
 const API_URL = "http://localhost:5000/api"
 
 export async function login(data: any) {
@@ -382,4 +384,132 @@ export async function getPendingPayments(){
   })
 
   return res.json()
+}
+
+// ===============================
+// NOTIFICATIONS
+// ===============================
+
+
+export async function getNotifications(){
+
+  const res = await fetch(`${API_URL}/notifications`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  return res.json()
+}
+
+
+export async function createNotification(data:any){
+
+  const res = await fetch(`${API_URL}/notifications`,{
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  return res.json()
+
+}
+
+
+// PROFILE
+
+export async function getProfile(){
+
+  const res = await fetch(`${API_URL}/profile`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to fetch profile" }
+  }
+
+  return res.json()
+}
+
+
+export async function updateProfile(data:any){
+
+  const res = await fetch(`${API_URL}/profile`,{
+
+    method:"PUT",
+
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to update profile" }
+  }
+
+  return res.json()
+
+}
+
+
+export async function changePassword(data:any){
+
+  const res = await fetch(`${API_URL}/profile/password`,{
+
+    method:"PUT",
+
+    headers:{
+      "Content-Type":"application/json",
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to change password" }
+  }
+
+  return res.json()
+
+}
+
+
+
+
+
+// DashboardPage
+
+export async function getDashboardStats(){
+
+  const res = await fetch(`${API_URL}/dashboard`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to fetch dashboard" }
+  }
+
+  return res.json()
+
 }

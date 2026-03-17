@@ -7,6 +7,9 @@ export default function AdminSidebar() {
         Society Admin
       </h1>
       <nav className="flex flex-col gap-4">
+        <Link href="/admin/profile" className="hover:bg-green-100 p-2 rounded-lg transition duration-200 text-gray-700 hover:text-green-700">
+          Profile
+        </Link>
         <Link href="/admin/dashboard" className="hover:bg-green-100 p-2 rounded-lg transition duration-200 text-gray-700 hover:text-green-700">
           Dashboard
         </Link>

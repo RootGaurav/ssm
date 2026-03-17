@@ -1,11 +1,23 @@
 const express = require("express")
-
 const router = express.Router()
 
-const notificationController = require("../controllers/notificationController")
+const controller = require("../controllers/notificationController")
 
-router.get("/", notificationController.getNotifications)
+const authMiddleware = require("../middleware/authMiddleware")
+const adminMiddleware = require("../middleware/adminMiddleware")
 
-router.post("/", notificationController.createNotification)
+router.get(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  controller.getNotifications
+)
+
+router.post(
+  "/",
+  authMiddleware,
+  adminMiddleware,
+  controller.createNotification
+)
 
 module.exports = router

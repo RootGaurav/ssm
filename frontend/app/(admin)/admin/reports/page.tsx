@@ -1,11 +1,34 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   getMonthlyReport,
   getYearlyReport,
   getPendingPayments
 } from "@/services/api"
+import { Line, Pie } from "react-chartjs-2"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from "chart.js"
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 export default function ReportsPage(){
 
@@ -29,7 +52,54 @@ export default function ReportsPage(){
     loadReports()
   },[])
 
+  const monthlyChartData = useMemo(() => {
+    const labels = monthly.map((r:any) => `${r.month}/${r.year}`)
+    const totals = monthly.map((r:any) => Number(r.total_collection || 0))
+    return {
+      labels,
+      datasets: [
+        {
+          label: "Total Collection",
+          data: totals,
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22, 163, 74, 0.2)",
+          tension: 0.3,
+          fill: true
+        }
+      ]
+    }
+  }, [monthly])
 
+  const paymentModeData = useMemo(() => {
+    const cash = monthly.reduce((sum:any, r:any) => sum + Number(r.cash_payments || 0), 0)
+    const upi = monthly.reduce((sum:any, r:any) => sum + Number(r.upi_payments || 0), 0)
+    return {
+      labels: ["Cash", "UPI"],
+      datasets: [
+        {
+          data: [cash, upi],
+          backgroundColor: ["#16a34a", "#2563eb"],
+          hoverBackgroundColor: ["#15803d", "#1d4ed8"]
+        }
+      ]
+    }
+  }, [monthly])
+
+  const downloadCsv = (filename:string, rows:any[]) => {
+    if (!rows || rows.length === 0) return
+    const header = Object.keys(rows[0])
+    const csv = [header.join(",")].concat(
+      rows.map((row:any) => header.map((h) => `"${String(row[h] ?? "").replace(/"/g, '""')}"`).join(","))
+    ).join("\n")
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = filename
+    link.click()
+  }
+
+  const exportMonthlyCsv = () => downloadCsv("monthly-report.csv", monthly)
 
   return(
 
@@ -89,7 +159,7 @@ export default function ReportsPage(){
 
         </div>
 
-
+ 
 
         {/* MONTHLY REPORT */}
 
@@ -140,9 +210,10 @@ export default function ReportsPage(){
 
         <div className="bg-white p-6 rounded-xl shadow">
 
-          <h2 className="text-xl text-gray-800 font-semibold mb-4">
-            Yearly Collection
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl text-gray-800 font-semibold">Yearly Collection</h2>
+        
+          </div>
 
           <div className="overflow-x-auto">
             <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
@@ -173,6 +244,57 @@ export default function ReportsPage(){
 
         </div>
 
+                   {/* CHARTS & EXPORTS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl text-gray-800 font-semibold">Monthly Trend</h2>
+              <button
+                onClick={exportMonthlyCsv}
+                className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm"
+              >
+                Download CSV
+              </button>
+            </div>
+            <div className="h-64">
+              <Line data={monthlyChartData} options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: "bottom" },
+                  tooltip: { mode: "index", intersect: false }
+                },
+                scales: {
+                  x: { ticks: { color: "#4b5563" } },
+                  y: { ticks: { color: "#4b5563" } }
+                }
+              }} />
+            </div>
+          </section>
+
+          <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl text-gray-800 font-semibold">Payment Mode Breakdown</h2>
+              <button
+                onClick={exportMonthlyCsv}
+                className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-sm"
+              >
+                Download CSV
+              </button>
+            </div>
+            <div className="h-64 flex items-center justify-center">
+              <Pie data={paymentModeData} options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { position: "bottom" }
+                }
+              }} />
+            </div>
+          </section>
+
+        </div>
       </div>
 
     </div>
