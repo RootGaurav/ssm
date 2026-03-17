@@ -13,6 +13,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+ src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"
+ async
+></script>
+      </head>
       <body>{children}</body>
     </html>
   );

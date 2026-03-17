@@ -11,11 +11,9 @@ export default function ResidentDashboard(){
 
     const result = await getResidentDashboard()
 
-    if(result.error){
-  alert(result.error)
-}else{
-  setData(result)
-}
+    if(!result.error){
+      setData(result)
+    }
 
   }
 

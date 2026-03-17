@@ -424,6 +424,26 @@ export async function createNotification(data:any){
 }
 
 
+export async function sendNotification(data:any){
+
+  const res = await fetch(
+    `${API_URL}/notifications`,
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${localStorage.getItem("token")}`
+      },
+      body:JSON.stringify(data)
+    }
+  )
+
+  return res.json()
+
+}
+
+
+
 // PROFILE
 
 export async function getProfile(){
