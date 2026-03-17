@@ -513,3 +513,20 @@ export async function getDashboardStats(){
   return res.json()
 
 }
+
+export async function getResidentDashboard(){
+
+  const res = await fetch(`${API_URL}/resident/dashboard`,{
+    headers:{
+      Authorization:`Bearer ${localStorage.getItem("token")}`
+    }
+  })
+
+  if(!res.ok){
+    const error = await res.json()
+    return { error: error.error || "Failed to fetch resident dashboard" }
+  }
+
+  return res.json()
+
+}
