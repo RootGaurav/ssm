@@ -1,0 +1,56 @@
+# =========================================
+# Dependencies (Frontend & Backend)
+# =========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# =========================================
+# Environment Variables
+# =========================================
+# Keep your secrets out of version control!
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+
+# =========================================
+# Next.js (Frontend Specifics)
+# =========================================
+.next/
+out/
+build/
+.vercel/
+next-env.d.ts
+tsbuildinfo
+
+# =========================================
+# Express / Node.js (Backend Specifics)
+# =========================================
+# Logs
+logs
+*.log
+
+# Coverage directories used by testing tools (e.g., Jest, Mocha)
+coverage/
+.nyc_output/
+
+# Serverless/Deployment directories (if using them)
+.serverless/
+
+# =========================================
+# OS & Editor/IDE Files
+# =========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
