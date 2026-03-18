@@ -19,11 +19,9 @@ export default function FlatModal({flat,onClose,onSuccess}:any){
       try {
         const res = await getResidents()
         if(!res.error){
-          // Filter residents: include only unassigned or the currently selected
-          const filteredResidents = res.filter((r:any) => !r.flat_id || String(r.id) === selectedResidentId)
-          setResidents(filteredResidents)
+          setResidents(res)
           if(selectedResidentId){
-            const resident = filteredResidents.find((r:any) => String(r.id) === selectedResidentId)
+            const resident = res.find((r:any) => String(r.id) === selectedResidentId)
             if(resident){
               setOwner(resident.name)
               setEmail(resident.email)

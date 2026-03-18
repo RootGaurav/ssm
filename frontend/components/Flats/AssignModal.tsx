@@ -13,7 +13,7 @@ export default function AssignModal({ flatId, onClose, onSuccess }: any) {
 
   async function loadResidents() {
     const data = await getResidents()
-    if (Array.isArray(data)) setResidents(data.filter(r => !r.flat_id)) // Only unassigned residents
+    if (Array.isArray(data)) setResidents(data)
   }
 
   async function handleAssign() {

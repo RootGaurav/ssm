@@ -1,5 +1,17 @@
 const pool = require("../db")
 
+const syncPaymentsSequence = async (client) => {
+  await client.query(
+    `
+    SELECT setval(
+      pg_get_serial_sequence('payments', 'id'),
+      COALESCE((SELECT MAX(id) FROM payments), 0) + 1,
+      false
+    )
+    `
+  )
+}
+
 // GET RECORDS BY MONTH + YEAR
 const getMonthlyRecords = async (month, year) => {
 
@@ -58,18 +70,71 @@ const generateMonthlyRecords = async (month, year) => {
 
 // MARK PAID
 const updateMonthlyRecord = async (id, status) => {
+  const client = await pool.connect()
 
-  const result = await pool.query(
-    `
-    UPDATE monthly_records
-    SET status = $1
-    WHERE id = $2
-    RETURNING *
-    `,
-    [status, id]
-  )
+  try {
+    await client.query("BEGIN")
 
-  return result.rows[0]
+    const existing = await client.query(
+      `
+      SELECT id, flat_id, month, year, amount
+      FROM monthly_records
+      WHERE id = $1
+      FOR UPDATE
+      `,
+      [id]
+    )
+
+    if (!existing.rows[0]) {
+      await client.query("ROLLBACK")
+      return null
+    }
+
+    const record = existing.rows[0]
+
+    const result = await client.query(
+      `
+      UPDATE monthly_records
+      SET status = $1
+      WHERE id = $2
+      RETURNING *
+      `,
+      [status, id]
+    )
+
+    if (status === "paid") {
+      await syncPaymentsSequence(client)
+      await client.query(
+        `
+        INSERT INTO payments
+          (flat_id, month, year, amount, payment_mode, transaction_id, status)
+        VALUES
+          ($1, $2, $3, $4, 'online', $5, 'success')
+        ON CONFLICT (flat_id, month, year)
+        DO UPDATE SET
+          amount = EXCLUDED.amount,
+          payment_mode = 'online',
+          status = 'success',
+          transaction_id = COALESCE(payments.transaction_id, EXCLUDED.transaction_id)
+        `,
+        [
+          record.flat_id,
+          record.month,
+          record.year,
+          record.amount,
+          `ADMIN-${Date.now()}-${record.id}`,
+        ]
+      )
+    }
+
+    await client.query("COMMIT")
+    return result.rows[0]
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 }
 
 module.exports = {

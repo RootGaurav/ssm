@@ -4,28 +4,40 @@ import { useEffect, useState } from "react"
 import { logout } from "@/utils/logout"
 import { isLoggedIn } from "@/utils/auth"
 import ResidentSidebar from "@/components/ResidentSidebar"
+import { getResidentProfile } from "@/services/api"
+
 export default function ResidentLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const [loggedIn, setLoggedIn] = useState(false)
+  const [residentName, setResidentName] = useState("Resident")
 
   useEffect(() => {
     setLoggedIn(isLoggedIn())
+
+    async function loadProfile() {
+      const user = await getResidentProfile()
+      if (!user?.error && user?.name) {
+        setResidentName(user.name)
+      }
+    }
+
+    loadProfile()
   }, [])
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Sidebar */}
-      {loggedIn && <ResidentSidebar />}
+      {loggedIn && <ResidentSidebar userName={residentName} />}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Top Navbar */}
         <header className="bg-white shadow">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-xl font-bold text-green-600">Society Portal - Resident</h1>
+            <h1 className="text-xl font-bold text-green-600">Society Portal - {residentName}</h1>
 
             {loggedIn && (
               <button

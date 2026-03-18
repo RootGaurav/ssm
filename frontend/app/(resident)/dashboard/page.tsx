@@ -128,6 +128,7 @@ export default function ResidentDashboard(){
               <thead className="bg-gray-50">
 
                 <tr>
+                  <th className="p-4 text-left text-gray-700 font-semibold">Flat</th>
                   <th className="p-4 text-left text-gray-700 font-semibold">Month</th>
                   <th className="p-4 text-left text-gray-700 font-semibold">Year</th>
                   <th className="p-4 text-left text-gray-700 font-semibold">Amount</th>
@@ -142,6 +143,7 @@ export default function ResidentDashboard(){
                   data.recentPayments.map((p:any,i:number)=>(
                     <tr key={i} className="border-t border-gray-100 hover:bg-gray-50">
 
+                      <td className="p-4 text-gray-800">{p.flat_number}</td>
                       <td className="p-4 text-gray-800">{p.month}</td>
                       <td className="p-4 text-gray-800">{p.year}</td>
                       <td className="p-4 text-gray-800 font-medium">₹{p.amount}</td>
@@ -151,7 +153,7 @@ export default function ResidentDashboard(){
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-gray-500">
+                    <td colSpan={5} className="p-8 text-center text-gray-500">
                       No recent payments found
                     </td>
                   </tr>

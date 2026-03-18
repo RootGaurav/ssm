@@ -1,11 +1,9 @@
-import Link from "next/link";
+import Link from "next/link"
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ userName }: { userName: string }) {
   return (
     <aside className="w-64 bg-white text-gray-800 min-h-screen p-6 border-r border-gray-200 shadow-lg">
-      <h1 className="text-xl font-bold mb-8 text-gray-800">
-        Society Admin
-      </h1>
+      <h1 className="text-xl font-bold mb-8 text-gray-800">{userName}</h1>
       <nav className="flex flex-col gap-4">
         <Link href="/admin/profile" className="hover:bg-green-100 p-2 rounded-lg transition duration-200 text-gray-700 hover:text-green-700">
           Profile
@@ -33,5 +31,5 @@ export default function AdminSidebar() {
         </Link>
       </nav>
     </aside>
-  );
+  )
 }

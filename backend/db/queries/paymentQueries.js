@@ -1,5 +1,17 @@
 const pool = require("../db")
 
+const syncPaymentsSequence = async (client) => {
+  await client.query(
+    `
+    SELECT setval(
+      pg_get_serial_sequence('payments', 'id'),
+      COALESCE((SELECT MAX(id) FROM payments), 0) + 1,
+      false
+    )
+    `
+  )
+}
+
 // CREATE OFFLINE PAYMENT
 const createOfflinePayment = async (data) => {
 
@@ -10,6 +22,7 @@ const createOfflinePayment = async (data) => {
   try {
 
     await client.query("BEGIN")
+    await syncPaymentsSequence(client)
 
     const paymentResult = await client.query(
       `
@@ -74,21 +87,32 @@ const getPaymentsByFlat = async (flatId) => {
 }
 
 const createPayment = async (flatId, month, year, amount) => {
+  const client = await pool.connect()
 
-  await pool.query(
-    `
-    INSERT INTO payments
-    (flat_id, month, year, amount, payment_mode, transaction_id, status)
-    VALUES ($1,$2,$3,$4,'online',$5,'success')
-    `,
-    [
-      flatId,
-      month,
-      year,
-      amount,
-      `MOCK-${Date.now()}`
-    ]
-  )
+  try {
+    await client.query("BEGIN")
+    await syncPaymentsSequence(client)
+    await client.query(
+      `
+      INSERT INTO payments
+      (flat_id, month, year, amount, payment_mode, transaction_id, status)
+      VALUES ($1,$2,$3,$4,'online',$5,'success')
+      `,
+      [
+        flatId,
+        month,
+        year,
+        amount,
+        `MOCK-${Date.now()}`
+      ]
+    )
+    await client.query("COMMIT")
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 
 }
 

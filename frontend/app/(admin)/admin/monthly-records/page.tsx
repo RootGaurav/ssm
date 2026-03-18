@@ -16,6 +16,9 @@ export default function MonthlyRecordsPage(){
   const [year,setYear] = useState(today.getFullYear())
 
   const [records,setRecords] = useState<any[]>([])
+  const [confirmRecord,setConfirmRecord] = useState<any>(null)
+  const [markingId,setMarkingId] = useState<number | null>(null)
+  const [error,setError] = useState("")
 
 
 
@@ -48,10 +51,30 @@ export default function MonthlyRecordsPage(){
 
 
   async function handleMarkPaid(id:number){
+    setMarkingId(id)
+    setError("")
 
-    await markRecordPaid(id)
+    const previous = records
 
-    loadRecords()
+    // Optimistic UI: show paid immediately and hide action button.
+    setRecords((prev)=>
+      prev.map((r:any)=>
+        r.id === id ? {...r,status:"paid"} : r
+      )
+    )
+
+    const result = await markRecordPaid(id)
+
+    if(result?.error){
+      setError(result.error)
+      setRecords(previous)
+      setMarkingId(null)
+      return
+    }
+
+    setConfirmRecord(null)
+    setMarkingId(null)
+    await loadRecords()
 
   }
 
@@ -70,6 +93,12 @@ export default function MonthlyRecordsPage(){
         <p className="text-gray-600 mb-8">
           View and manage monthly subscription payments for flats
         </p>
+
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
 
 
 
@@ -162,10 +191,11 @@ export default function MonthlyRecordsPage(){
                   {r.status === "pending" && (
 
                     <button
-                      onClick={()=>handleMarkPaid(r.id)}
+                      onClick={()=>setConfirmRecord(r)}
+                      disabled={markingId === r.id}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200 shadow-md"
                     >
-                      Mark Paid
+                      {markingId === r.id ? "Marking..." : "Mark Paid"}
                     </button>
 
                   )}
@@ -179,6 +209,38 @@ export default function MonthlyRecordsPage(){
           </tbody>
 
         </table>
+
+        {confirmRecord && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                Mark As Paid
+              </h2>
+
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to mark <span className="font-semibold">{confirmRecord.flat_number}</span> as paid?
+              </p>
+
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={()=>setConfirmRecord(null)}
+                  disabled={markingId === confirmRecord.id}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={()=>handleMarkPaid(confirmRecord.id)}
+                  disabled={markingId === confirmRecord.id}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition duration-200 shadow-md"
+                >
+                  {markingId === confirmRecord.id ? "Marking..." : "Yes, Mark Paid"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
 

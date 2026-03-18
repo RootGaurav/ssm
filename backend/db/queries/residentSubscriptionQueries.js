@@ -1,7 +1,7 @@
 const pool = require("../db")
 
 // ALL SUBSCRIPTIONS
-const getSubscriptions = async (flatId) => {
+const getSubscriptions = async (userId) => {
 
   const result = await pool.query(
     `
@@ -21,10 +21,11 @@ const getSubscriptions = async (flatId) => {
       AND p.year = mr.year
     LEFT JOIN flats f
       ON f.id = mr.flat_id
-    WHERE mr.flat_id = $1
+    WHERE f.user_id = $1
+      AND f.is_deleted = false
     ORDER BY mr.year DESC, mr.month DESC
     `,
-    [flatId]
+    [userId]
   )
 
   return result.rows
@@ -32,7 +33,7 @@ const getSubscriptions = async (flatId) => {
 
 
 // SINGLE SUBSCRIPTION
-const getSubscriptionDetail = async (flatId, year, month) => {
+const getSubscriptionDetail = async (userId, year, month, flatId = null) => {
 
   const result = await pool.query(
     `
@@ -54,11 +55,15 @@ const getSubscriptionDetail = async (flatId, year, month) => {
       AND p.year = mr.year
     LEFT JOIN flats f
       ON f.id = mr.flat_id
-    WHERE mr.flat_id = $1
-    AND mr.year = $2
-    AND mr.month = $3
+    WHERE f.user_id = $1
+      AND f.is_deleted = false
+      AND mr.year = $2
+      AND mr.month = $3
+      AND ($4::int IS NULL OR mr.flat_id = $4::int)
+    ORDER BY mr.flat_id
+    LIMIT 1
     `,
-    [flatId, year, month]
+    [userId, year, month, flatId]
   )
 
   return result.rows[0]

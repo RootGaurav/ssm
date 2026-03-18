@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { getSubscriptions, paySubscription, getRazorpayKey } from "@/services/api"
 
 interface PaymentData {
+  flat_id: number
   month: number
   year: number
   amount: number
@@ -12,6 +13,7 @@ interface PaymentData {
 }
 
 interface ReceiptData {
+  flatId: number
   userName: string
   userEmail: string
   flatNumber: string
@@ -54,7 +56,11 @@ export default function PayNow() {
     setErrorMessage("")
 
     try {
-      const result = await paySubscription(selectedPayment.month, selectedPayment.year)
+      const result = await paySubscription(
+        selectedPayment.month,
+        selectedPayment.year,
+        selectedPayment.flat_id
+      )
 
       if (result.success) {
         setReceiptData(result)

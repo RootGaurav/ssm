@@ -63,12 +63,13 @@ const paySubscription = async (req,res)=>{
 
   try{
 
-    const {month,year} = req.body
+    const {month,year,flat_id} = req.body
 
     const result = await paymentService.paySubscription(
       req.user.id,
       month,
-      year
+      year,
+      flat_id
     )
 
     res.json(result)

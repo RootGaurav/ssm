@@ -28,11 +28,13 @@ const getSubscriptionDetail = async (req,res)=>{
   try{
 
     const {year,month} = req.params
+    const flatId = req.query.flat_id ? Number(req.query.flat_id) : null
 
     const data = await service.getSubscriptionDetail(
       req.user.id,
       year,
-      month
+      month,
+      flatId
     )
 
     res.json(data)

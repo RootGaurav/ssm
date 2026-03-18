@@ -1,46 +1,41 @@
 "use client"
 import { useEffect, useState } from "react"
-import Link from "next/link"
-import { logout } from "@/utils/logout"
-import { isLoggedIn } from "@/utils/auth"
 import AdminSidebar from "@/components/AdminSidebar"
 import AdminNavbar from "@/components/AdminNavbar"
+import { getProfile } from "@/services/api"
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-   const [loggedIn,setLoggedIn] = useState(false)
+  const [adminName, setAdminName] = useState("Admin")
 
-  useEffect(()=>{
-    setLoggedIn(isLoggedIn())
-  },[])
-  
+  useEffect(() => {
+    async function loadProfile() {
+      const user = await getProfile()
+      if (!user?.error && user?.name) {
+        setAdminName(user.name)
+      }
+    }
+
+    loadProfile()
+  }, [])
 
   return (
-
     <div className="min-h-screen flex bg-gradient-to-br from-blue-50 to-indigo-100">
-
       {/* Sidebar */}
-      <AdminSidebar />
+      <AdminSidebar userName={adminName} />
 
       {/* Main Content */}
-
       <div className="flex-1 flex flex-col">
-
         {/* Top Navbar */}
-        <AdminNavbar />
+        <AdminNavbar userName={adminName} />
 
         <main className="p-6">
-
           {children}
-
         </main>
-
       </div>
-
     </div>
-
   )
 }

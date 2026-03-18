@@ -34,16 +34,25 @@ const getPaymentsByFlat = async (flatId) => {
 
 
 
-const paySubscription = async (userId, month, year) => {
+const paySubscription = async (userId, month, year, flatId) => {
 
-  const user = await pool.query(
-    `SELECT flat_id FROM users WHERE id=$1`,
-    [userId]
+  if (!flatId) {
+    throw new Error("Flat ID is required")
+  }
+
+  const flatAccess = await pool.query(
+    `
+    SELECT id, flat_number, flat_type
+    FROM flats
+    WHERE id = $1
+      AND user_id = $2
+      AND is_deleted = false
+    LIMIT 1
+    `,
+    [flatId, userId]
   )
 
-  const flatId = user.rows[0]?.flat_id
-
-  if(!flatId){
+  if(flatAccess.rows.length === 0){
     throw new Error("User not assigned to flat")
   }
 
@@ -70,11 +79,11 @@ const paySubscription = async (userId, month, year) => {
 
   // Fetch user and flat details for receipt
   const userDetailsResult = await pool.query(
-    `SELECT u.name, u.email, f.flat_number, f.flat_type 
-     FROM users u 
-     JOIN flats f ON u.flat_id = f.id 
+    `SELECT u.name, u.email, f.flat_number, f.flat_type
+     FROM users u
+     JOIN flats f ON f.id = $2
      WHERE u.id = $1`,
-    [userId]
+    [userId, flatId]
   )
 
   const userDetails = userDetailsResult.rows[0]

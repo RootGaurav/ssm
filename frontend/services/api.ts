@@ -634,10 +634,11 @@ export async function getSubscriptions(){
 }
 
 
-export async function getSubscriptionDetail(year:number,month:number){
+export async function getSubscriptionDetail(year:number,month:number,flatId?:number){
+  const query = flatId ? `?flat_id=${flatId}` : ""
 
   const res = await fetch(
-    `${API_URL}/resident/subscriptions/${year}/${month}`,
+    `${API_URL}/resident/subscriptions/${year}/${month}${query}`,
     {
       headers:{
         Authorization:`Bearer ${localStorage.getItem("token")}`
@@ -657,7 +658,7 @@ export async function getRazorpayKey(){
   return res.json()
 }
 
-export async function paySubscription(month:number,year:number){
+export async function paySubscription(month:number,year:number,flatId:number){
 
   const res = await fetch(`${API_URL}/payments/resident/pay`,{
     method:"POST",
@@ -667,7 +668,8 @@ export async function paySubscription(month:number,year:number){
     },
     body:JSON.stringify({
       month,
-      year
+      year,
+      flat_id: flatId
     })
   })
 
@@ -676,5 +678,4 @@ export async function paySubscription(month:number,year:number){
 }
 
 //profile page
-
 

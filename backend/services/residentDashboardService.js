@@ -4,22 +4,28 @@ const pool = require("../db/db")
 
 const getResidentDashboard = async (userId) => {
 
-  // GET USER FLAT
-  const userResult = await pool.query(
-    `SELECT flat_id FROM users WHERE id=$1`,
+  // GET USER FLATS
+  const flatsResult = await pool.query(
+    `
+    SELECT id AS flat_id
+    FROM flats
+    WHERE user_id = $1
+      AND is_deleted = false
+    ORDER BY id
+    `,
     [userId]
   )
 
-  const flatId = userResult.rows[0]?.flat_id
+  const flatIds = flatsResult.rows.map((row) => row.flat_id)
 
-  if(!flatId){
+  if(flatIds.length === 0){
     throw new Error("Resident not assigned to a flat")
   }
 
-  const status = await queries.getCurrentMonthStatus(flatId)
-  const pending = await queries.getPendingAmount(flatId)
-  const payments = await queries.getRecentPayments(flatId)
-  const notifications = await queries.getNotifications(flatId,userId)
+  const status = await queries.getCurrentMonthStatus(flatIds)
+  const pending = await queries.getPendingAmount(flatIds)
+  const payments = await queries.getRecentPayments(flatIds)
+  const notifications = await queries.getNotifications(flatIds,userId)
 
   return {
     currentMonth: status,

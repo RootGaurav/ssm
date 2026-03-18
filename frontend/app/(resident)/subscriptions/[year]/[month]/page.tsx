@@ -2,12 +2,13 @@
 
 import { useEffect,useState } from "react"
 import { getSubscriptionDetail } from "@/services/api"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import Link from "next/link"
 
 export default function SubscriptionDetail(){
 
   const params = useParams<{year:string,month:string}>()
+  const searchParams = useSearchParams()
 
   const [data,setData] = useState<any>(null)
 
@@ -15,7 +16,8 @@ export default function SubscriptionDetail(){
 
     const result = await getSubscriptionDetail(
       Number(params.year),
-      Number(params.month)
+      Number(params.month),
+      searchParams.get("flat_id") ? Number(searchParams.get("flat_id")) : undefined
     )
 
     setData(result)
@@ -24,7 +26,7 @@ export default function SubscriptionDetail(){
 
   useEffect(()=>{
     load()
-  },[])
+  },[params.year, params.month, searchParams])
 
   if(!data){
     return (

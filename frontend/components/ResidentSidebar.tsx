@@ -1,9 +1,9 @@
-import Link from "next/link";
+import Link from "next/link"
 
-export default function ResidentSidebar() {
+export default function ResidentSidebar({ userName }: { userName: string }) {
   return (
     <aside className="w-64 bg-white text-gray-800 min-h-screen p-6 border-r border-gray-200 shadow-lg">
-      <h1 className="text-xl font-bold mb-8 text-gray-800">Resident</h1>
+      <h1 className="text-xl font-bold mb-8 text-gray-800">{userName}</h1>
       <nav className="flex flex-col gap-3">
         <Link
           href="/dashboard"
@@ -31,5 +31,5 @@ export default function ResidentSidebar() {
         </Link>
       </nav>
     </aside>
-  );
+  )
 }
