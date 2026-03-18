@@ -19,7 +19,7 @@ export default function ResidentModal({ onClose, onSuccess }: any) {
 
   async function loadFlats() {
     const data = await getFlats()
-    if (Array.isArray(data)) setFlats(data.filter(f => !f.owner_name))
+    if (Array.isArray(data)) setFlats(data.filter(f => f.status === "vacant"))
   }
 
   async function handleSubmit(e: any) {

@@ -94,7 +94,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
                   >
                     Edit
                   </button>
-                  {flat.owner_name && (
+                  {flat.status==="occupied" && (
                     <button
                       onClick={()=>onVacate(flat.id)}
                       className="text-orange-600 hover:text-orange-800 font-medium transition"
@@ -102,7 +102,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
                       Vacate
                     </button>
                   )}
-                  {!flat.owner_name && (
+                  {flat.status==="vacant" && (
                     <button
                       onClick={()=>onAssign(flat)}
                       className="text-blue-600 hover:text-blue-800 font-medium transition"

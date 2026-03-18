@@ -610,6 +610,7 @@ export async function getResidentDashboard(){
     }
   })
 
+
   if(!res.ok){
     const error = await res.json()
     return { error: error.error || "Failed to fetch resident dashboard" }
