@@ -29,7 +29,6 @@ export default function ResidentLogin() {
         return
       }
 
-
       document.cookie = `token=${res.token}; path=/`
 
       router.push("/dashboard")

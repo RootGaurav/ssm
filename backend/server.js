@@ -1,15 +1,12 @@
 const express = require("express")
 const cors = require("cors")
-const session = require("express-session")
-const passport = require("passport")
-const bcrypt = require("bcrypt")
+const helmet = require("helmet")
 
 require("dotenv").config()
 
+const app = express()
 
-
-
-
+// Routes
 const flatRoutes = require("./routes/flatRoutes")
 const residentRoutes = require("./routes/residentRoutes")
 const subscriptionRoutes = require("./routes/subscriptionRoutes")
@@ -23,77 +20,23 @@ const profileRoutes = require("./routes/profileRoutes")
 const residentDashboardRoutes = require("./routes/residentDashboardRoutes")
 const residentSubscriptions = require("./routes/residentSubscriptions")
 const residentProfileRoutes = require("./routes/residentProfileRoutes")
-const app = express()
+
+// ✅ Security
+app.use(helmet())
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
   credentials: true
 }))
 
 app.use(express.json())
 
-
-// Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false } // Set to true in production with HTTPS
-}))
-
-
-
-//
-
-
-
-
-
-// Passport configuration
-app.use(passport.initialize())
-app.use(passport.session())
-
-
-// Passport Google Strategy
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const authService = require('./services/authService');
-
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:5000/api/auth/google/callback"
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const user = await authService.findOrCreateGoogleUser({
-      id: profile.id,
-      name: profile.displayName,
-      email: profile.emails[0].value
-    });
-    return done(null, user);
-  } catch (error) {
-    return done(error, null);
-  }
-}));
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await authService.findUserById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
-
-app.get("/api/health", async (req, res) => {
-  // const hashedPassword = await bcrypt.hash("123456", 10)
+// ✅ Health check
+app.get("/api/health", (req, res) => {
   res.json({ message: "API running" })
 })
 
-// Razorpay keys endpoint
+// ✅ Razorpay key
 app.get("/api/payments/razorpay-key", (req, res) => {
   res.json({ key: process.env.RAZORPAY_KEY_ID })
 })
@@ -111,6 +54,11 @@ app.use("/api/profile", profileRoutes)
 app.use("/api/resident/profile", residentProfileRoutes)
 app.use("/api/resident/dashboard", residentDashboardRoutes)
 app.use("/api/resident/subscriptions", residentSubscriptions)
+
+app.use((err, req, res, next) => {
+  console.error("Error:", err.stack)
+  res.status(500).json({ error: "Internal Server Error" })
+})
 
 const PORT = process.env.PORT || 5000
 

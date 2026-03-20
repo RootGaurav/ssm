@@ -1,8 +1,6 @@
 export function logout(redirectPath: string) {
 
-  // Clear localStorage
-  localStorage.removeItem("token")
-  
+
   // Clear sessionStorage
   sessionStorage.clear()
 

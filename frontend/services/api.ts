@@ -1,7 +1,15 @@
-import DashboardPage from "@/app/(resident)/dashboard/page"
-import { profile } from "console"
 
 const API_URL = "http://localhost:5000/api"
+
+function getAuthToken() {
+  if (typeof document === "undefined") return ""
+
+  const tokenCookie = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith("token="))
+
+  return tokenCookie?.split("=")[1] || ""
+}
 
 export async function login(data: any) {
 
@@ -20,7 +28,6 @@ export async function login(data: any) {
     if (!res.ok) {
       return { error: result.error || "Login failed" }
     }
-    localStorage.setItem("token", result.token)
 
     return result
 
@@ -50,7 +57,6 @@ export async function register(data: any) {
     if (!res.ok) {
       return { error: result.error || "Registration failed" }
     }
-    localStorage.setItem("token", result.token)
 
     return result
 
@@ -70,7 +76,7 @@ export async function getFlats() {
 
   const res = await fetch(`${API_URL}/flats`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -87,7 +93,7 @@ export async function createFlat(data:any) {
 
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     },
 
     body: JSON.stringify(data)
@@ -107,7 +113,7 @@ export async function updateFlat(id:number,data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -126,8 +132,8 @@ export async function deleteFlat(id:number){
 
     method:"DELETE",
 
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
 
   })
@@ -140,7 +146,7 @@ export async function deleteFlat(id:number){
 export async function getResidents() {
   const res = await fetch(`${API_URL}/residents`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
   return res.json()
@@ -152,7 +158,7 @@ export async function createResident(data: any) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     },
     body: JSON.stringify(data)
   })
@@ -165,7 +171,7 @@ export async function updateResident(id: number, data: any) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     },
     body: JSON.stringify(data)
   })
@@ -177,7 +183,7 @@ export async function deleteResident(id: number) {
   const res = await fetch(`${API_URL}/residents/${id}`, {
     method: "DELETE",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
   return res.json()
@@ -189,7 +195,7 @@ export async function assignResidentToFlat(residentId: number, flatId: number) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     },
     body: JSON.stringify({ residentId, flatId })
   })
@@ -201,7 +207,7 @@ export async function vacateFlat(flatId: number) {
   const res = await fetch(`${API_URL}/residents/vacate/${flatId}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
   return res.json()
@@ -218,7 +224,7 @@ export async function getSubscriptionPlans() {
 
   const res = await fetch(`${API_URL}/subscriptions`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -235,7 +241,7 @@ export async function updateSubscriptionPlan(id:number, amount:number) {
 
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+      Authorization: `Bearer ${getAuthToken()}`
     },
 
     body: JSON.stringify({
@@ -260,9 +266,9 @@ export async function getMonthlyRecords(month:number,year:number){
   const res = await fetch(
     `${API_URL}/monthly-records?month=${month}&year=${year}`,
     {
-      headers:{
-        Authorization:`Bearer ${localStorage.getItem("token")}`
-      }
+      headers: {
+      Authorization: `Bearer ${getAuthToken()}`
+    }
     }
   )
 
@@ -279,8 +285,8 @@ export async function generateMonthlyRecords(month:number,year:number){
 
       headers:{
         "Content-Type":"application/json",
-        Authorization:`Bearer ${localStorage.getItem("token")}`
-      },
+      Authorization:`Bearer ${getAuthToken()}`
+    },
 
       body:JSON.stringify({month,year})
     }
@@ -299,8 +305,8 @@ export async function markRecordPaid(id:number){
 
       headers:{
         "Content-Type":"application/json",
-        Authorization:`Bearer ${localStorage.getItem("token")}`
-      },
+      Authorization:`Bearer ${getAuthToken()}`
+    },
 
       body:JSON.stringify({
         status:"paid"
@@ -324,7 +330,7 @@ export async function createOfflinePayment(data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -340,8 +346,8 @@ export async function getPaymentsByFlat(flatId:number){
 
   const res = await fetch(`${API_URL}/payments/${flatId}`,{
 
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
 
   })
@@ -355,8 +361,8 @@ export async function getPaymentsByFlat(flatId:number){
 export async function getMonthlyReport(){
 
   const res = await fetch(`${API_URL}/reports/monthly`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -367,8 +373,8 @@ export async function getMonthlyReport(){
 export async function getYearlyReport(){
 
   const res = await fetch(`${API_URL}/reports/yearly`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -379,8 +385,8 @@ export async function getYearlyReport(){
 export async function getPendingPayments(){
 
   const res = await fetch(`${API_URL}/reports/pending`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -395,8 +401,8 @@ export async function getPendingPayments(){
 export async function getNotifications(){
 
   const res = await fetch(`${API_URL}/notifications`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -412,7 +418,7 @@ export async function createNotification(data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -432,8 +438,8 @@ export async function sendNotification(data:any){
       method:"POST",
       headers:{
         "Content-Type":"application/json",
-        Authorization:`Bearer ${localStorage.getItem("token")}`
-      },
+      Authorization:`Bearer ${getAuthToken()}`
+    },
       body:JSON.stringify(data)
     }
   )
@@ -449,8 +455,8 @@ export async function sendNotification(data:any){
 export async function getProfile(){
 
   const res = await fetch(`${API_URL}/profile`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -471,7 +477,7 @@ export async function updateProfile(data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -496,7 +502,7 @@ export async function changePassword(data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -520,8 +526,8 @@ export async function changePassword(data:any){
 export async function getResidentProfile(){
 
   const res = await fetch(`${API_URL}/resident/profile`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -542,7 +548,7 @@ export async function updateResidentProfile(data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -566,7 +572,7 @@ export async function changeResidentPassword(data:any){
 
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
 
     body:JSON.stringify(data)
@@ -588,8 +594,8 @@ export async function changeResidentPassword(data:any){
 export async function getDashboardStats(){
 
   const res = await fetch(`${API_URL}/dashboard`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -605,8 +611,8 @@ export async function getDashboardStats(){
 export async function getResidentDashboard(){
 
   const res = await fetch(`${API_URL}/resident/dashboard`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -624,8 +630,8 @@ export async function getResidentDashboard(){
 export async function getSubscriptions(){
 
   const res = await fetch(`${API_URL}/resident/subscriptions`,{
-    headers:{
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
     }
   })
 
@@ -640,9 +646,9 @@ export async function getSubscriptionDetail(year:number,month:number,flatId?:num
   const res = await fetch(
     `${API_URL}/resident/subscriptions/${year}/${month}${query}`,
     {
-      headers:{
-        Authorization:`Bearer ${localStorage.getItem("token")}`
-      }
+      headers: {
+      Authorization: `Bearer ${getAuthToken()}`
+    }
     }
   )
 
@@ -664,7 +670,7 @@ export async function paySubscription(month:number,year:number,flatId:number){
     method:"POST",
     headers:{
       "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+      Authorization:`Bearer ${getAuthToken()}`
     },
     body:JSON.stringify({
       month,
@@ -678,4 +684,3 @@ export async function paySubscription(month:number,year:number,flatId:number){
 }
 
 //profile page
-
