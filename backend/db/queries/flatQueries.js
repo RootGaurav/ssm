@@ -1,5 +1,25 @@
 const pool = require("../db")
 
+function normalizeOptionalText(value) {
+  if (value === undefined || value === null) return null
+
+  const normalizedValue = String(value).trim()
+
+  return normalizedValue === "" ? null : normalizedValue
+}
+
+const syncFlatsSequence = async (client) => {
+  await client.query(
+    `
+    SELECT setval(
+      pg_get_serial_sequence('flats', 'id'),
+      COALESCE((SELECT MAX(id) FROM flats), 0) + 1,
+      false
+    )
+    `
+  )
+}
+
 // GET ALL FLATS
 const getAllFlats = async () => {
   const result = await pool.query(
@@ -23,72 +43,97 @@ const getAllFlats = async () => {
 // CREATE FLAT
 const createFlat = async (flat) => {
   const { flat_number, owner_name, owner_email, phone, flat_type } = flat
+  const normalizedFlatNumber = flat_number ?? null
+  const client = await pool.connect()
 
-  // Vacant flat
-  if (owner_email === "NA" || !owner_email) {
-    const result = await pool.query(
+  try {
+    await client.query("BEGIN")
+    await syncFlatsSequence(client)
+
+    if(normalizedFlatNumber) {
+      const flatCheck = await client.query(
+        `SELECT id FROM flats WHERE flat_number=$1 AND is_deleted = false`,
+        [normalizedFlatNumber]
+      )
+
+      if (flatCheck.rows.length > 0) {
+        throw new Error("Flat already exists")
+      }
+    }
+    // Vacant flat
+    if (owner_email === "NA" || !owner_email) {
+      const result = await client.query(
+        `INSERT INTO flats
+        (flat_number, owner_name, owner_email, phone, flat_type, status, user_id)
+        VALUES ($1,$2,$3,$4,$5,$6,NULL)
+        RETURNING *`,
+        [
+          normalizedFlatNumber,
+          owner_name || "NA",
+          owner_email || "NA",
+          phone || "NA",
+          flat_type,
+          "vacant",
+        ]
+      )
+
+      await client.query("COMMIT")
+      return result.rows[0]
+    }
+
+    // Occupied flat
+    let userId = flat.user_id
+
+    if (userId) {
+      const userCheck = await client.query(
+        `SELECT id FROM users WHERE id = $1 AND role = 'resident'`,
+        [userId]
+      )
+
+      if (userCheck.rows.length === 0) {
+        throw new Error("Selected resident does not exist or is not a resident")
+      }
+    } else {
+      const userCheck = await client.query(
+        `SELECT id FROM users WHERE email = $1 AND role = 'resident'`,
+        [owner_email]
+      )
+
+      if (userCheck.rows.length === 0) {
+        throw new Error("Resident does not exist. Register user first.")
+      }
+
+      userId = userCheck.rows[0].id
+    }
+
+    if (owner_email) {
+      const emailCheck = await client.query(
+        `SELECT id FROM users WHERE email = $1 AND id != $2`,
+        [owner_email, userId]
+      )
+
+      if (emailCheck.rows.length > 0) {
+        throw new Error("Email already in use by another user")
+      }
+    }
+
+    const result = await client.query(
       `INSERT INTO flats
-      (flat_number, owner_name, owner_email, phone, flat_type, status, user_id)
-      VALUES ($1,$2,$3,$4,$5,$6,NULL)
+      (flat_number, owner_name, owner_email, phone, flat_type, user_id, status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
       RETURNING *`,
-      [
-        flat_number,
-        owner_name || "NA",
-        owner_email || "NA",
-        phone || "NA",
-        flat_type,
-        "vacant",
-      ]
+      [flat_number, owner_name, owner_email, phone, flat_type, userId, "occupied"]
     )
 
+    await client.query("COMMIT")
     return result.rows[0]
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
   }
 
-  // Occupied flat
-  let userId = flat.user_id
-
-  if (userId) {
-    const userCheck = await pool.query(
-      `SELECT id FROM users WHERE id = $1 AND role = 'resident'`,
-      [userId]
-    )
-
-    if (userCheck.rows.length === 0) {
-      throw new Error("Selected resident does not exist or is not a resident")
-    }
-  } else {
-    const userCheck = await pool.query(
-      `SELECT id FROM users WHERE email = $1 AND role = 'resident'`,
-      [owner_email]
-    )
-
-    if (userCheck.rows.length === 0) {
-      throw new Error("Resident does not exist. Register user first.")
-    }
-
-    userId = userCheck.rows[0].id
-  }
-
-  if (owner_email) {
-    const emailCheck = await pool.query(
-      `SELECT id FROM users WHERE email = $1 AND id != $2`,
-      [owner_email, userId]
-    )
-
-    if (emailCheck.rows.length > 0) {
-      throw new Error("Email already in use by another user")
-    }
-  }
-
-  const result = await pool.query(
-    `INSERT INTO flats
-    (flat_number, owner_name, owner_email, phone, flat_type, user_id, status)
-    VALUES ($1,$2,$3,$4,$5,$6,$7)
-    RETURNING *`,
-    [flat_number, owner_name, owner_email, phone, flat_type, userId, "occupied"]
-  )
-
-  return result.rows[0]
 }
 
 // UPDATE FLAT
@@ -96,11 +141,22 @@ const updateFlat = async (id, flat) => {
   const { flat_number, owner_name, owner_email, phone, flat_type, user_id } = flat
 
   const normalizedUserId = user_id ? parseInt(user_id, 10) : null
-  const normalizedOwnerName = owner_name ?? null
-  const normalizedOwnerEmail = owner_email ?? null
-  const normalizedPhone = phone ?? null
-  const normalizedFlatType = flat_type ?? null
+  const normalizedOwnerName = normalizeOptionalText(owner_name)
+  const normalizedOwnerEmail = normalizeOptionalText(owner_email)
+  const normalizedPhone = normalizeOptionalText(phone)
+  const normalizedFlatType = normalizeOptionalText(flat_type)
+  const normalizedFlatNumber = normalizeOptionalText(flat_number)
 
+  if(normalizedFlatNumber) {
+    const flatCheck = await pool.query(
+      `SELECT id FROM flats WHERE flat_number=$1 AND id != $2 AND is_deleted = false`,
+      [normalizedFlatNumber, id]
+    )
+
+    if (flatCheck.rows.length > 0) {
+      throw new Error("Flat number already exists")
+    }
+  }
   if (normalizedUserId) {
     const userCheck = await pool.query(
       `SELECT id FROM users WHERE id=$1 AND role='resident'`,
@@ -125,21 +181,21 @@ const updateFlat = async (id, flat) => {
 
   const result = await pool.query(
     `UPDATE flats
-     SET flat_number=$1,
-         owner_name=$2,
-         owner_email=$3,
-         phone=$4,
-         flat_type=$5,
+     SET flat_number=$1::text,
+         owner_name=$2::text,
+         owner_email=$3::text,
+         phone=$4::text,
+         flat_type=$5::text,
          user_id=$6::int,
          status = CASE
            WHEN $6::int IS NOT NULL THEN 'occupied'
-           WHEN $3 IS NOT NULL AND $3 != '' AND $3 != 'NA' THEN 'occupied'
+           WHEN COALESCE($3::text, '') NOT IN ('', 'NA') THEN 'occupied'
            ELSE 'vacant'
          END
      WHERE id=$7
      RETURNING *`,
     [
-      flat_number,
+      normalizedFlatNumber,
       normalizedOwnerName,
       normalizedOwnerEmail,
       normalizedPhone,

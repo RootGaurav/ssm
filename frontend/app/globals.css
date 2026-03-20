@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #f4f7f2;
+  --color-surface: rgba(255, 255, 255, 0.88);
+  --color-surface-strong: #ffffff;
+  --color-text: #17211b;
+  --color-text-muted: #5d6b61;
+  --color-border: rgba(23, 33, 27, 0.08);
+  --color-primary: #2f7a57;
+  --color-primary-strong: #1f5b40;
+  --color-primary-soft: #e2f1e8;
+  --color-secondary: #31493c;
+  --color-secondary-soft: #edf2ee;
+  --shadow-soft: 0 20px 60px rgba(24, 40, 30, 0.08);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-text);
+  --color-surface: var(--color-surface);
+  --color-surface-strong: var(--color-surface-strong);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-primary-strong: var(--color-primary-strong);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-soft: var(--color-secondary-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at top left, rgba(47, 122, 87, 0.14), transparent 26%),
+    radial-gradient(circle at top right, rgba(49, 73, 60, 0.08), transparent 20%),
+    linear-gradient(180deg, #f8fbf7 0%, #edf3ee 100%);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::selection {
+  background: rgba(47, 122, 87, 0.18);
+}
+
+a,
+button,
+input,
+textarea,
+select {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.card-surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+}
+
+.panel-surface {
+  background: var(--color-surface-strong);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 12px 36px rgba(24, 40, 30, 0.06);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.badge-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(47, 122, 87, 0.16);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--color-primary-strong);
+  padding: 0.45rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.field-control {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(23, 33, 27, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-text);
+  padding: 0.95rem 1rem;
+  outline: none;
+}
+
+.field-control:focus {
+  border-color: rgba(47, 122, 87, 0.36);
+  box-shadow: 0 0 0 4px rgba(47, 122, 87, 0.12);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-strong);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: var(--color-secondary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.btn-secondary:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
 }

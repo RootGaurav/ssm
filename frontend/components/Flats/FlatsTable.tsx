@@ -136,6 +136,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
           >
             Previous
           </button>
+          
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}

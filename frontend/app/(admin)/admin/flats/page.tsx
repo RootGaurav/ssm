@@ -18,7 +18,7 @@ export default function FlatsPage() {
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assignFlat, setAssignFlat] = useState<any>(null)
   const [showResidentModal, setShowResidentModal] = useState(false)
-  const [residentFlat, setResidentFlat] = useState(null)
+  const [showaddflat, setShowAddFlat] = useState(false)
 
   async function loadFlats(){
     const data = await getFlats()
@@ -30,7 +30,8 @@ export default function FlatsPage() {
   },[])
 
   const filteredFlats = flats.filter((flat:any)=>
-    flat.flat_number.toLowerCase().includes(search.toLowerCase())
+    flat.flat_number.toLowerCase().includes(search.toLowerCase()) ||
+    (flat.owner_name && flat.owner_name.toLowerCase().includes(search.toLowerCase()))
   )
 
   return(
@@ -39,7 +40,7 @@ export default function FlatsPage() {
 
       <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 max-w-6xl mx-auto">
 
-        <div className="flex justify-between mb-8">
+        <div className="flex flex-col gap-4 mb-8 md:flex-row md:items-start md:justify-between">
 
           <div>
 
@@ -52,21 +53,31 @@ export default function FlatsPage() {
             </p>
 
           </div>
+          <div className="flex flex-col gap-3 sm:flex-row md:justify-end md:items-center">
+            <button
+            onClick={()=>{
+              setShowAddFlat(true);
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 shadow-md w-full sm:w-auto"
+          >
+            Add Flat
+          </button>
 
           <button
             onClick={()=>{
-              setResidentFlat(null)
               setShowResidentModal(true)
             }}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 shadow-md"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 shadow-md w-full sm:w-auto"
           >
             Add Resident
           </button>
+          </div>
+          
 
         </div>
 
         <input
-          placeholder="Search flats by number..."
+          placeholder="Search flats by Flat Number or Owner Name..."
           className="w-full text-black placeholder:text-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 mb-6"
           value={search}
           onChange={(e)=>setSearch(e.target.value)}
@@ -101,6 +112,17 @@ export default function FlatsPage() {
             }}
           />
         )}
+        {showaddflat && (
+          <FlatModal
+            flat={null}
+            onClose={()=>setShowAddFlat(false)}
+            onSuccess={()=>{
+              loadFlats()
+              setShowAddFlat(false)
+            }}
+          />
+        )}
+            
 
         <DeleteConfirmModal
           isOpen={deleteId !== null}

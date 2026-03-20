@@ -87,15 +87,16 @@ export default function FlatModal({flat,onClose,onSuccess}:any){
           {flat ? "Edit Flat" : "Add Flat"}
 
         </h2>
+        
+
+        <p className="text-gray-600 text-center mb-6">
+          {flat ? "Update flat details" : "Enter new flat information"}
+        </p>
         {error && (
   <div className="bg-red-100 text-red-700 p-2 rounded mb-3">
     {error}
   </div>
 )}
-
-        <p className="text-gray-600 text-center mb-6">
-          {flat ? "Update flat details" : "Enter new flat information"}
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
