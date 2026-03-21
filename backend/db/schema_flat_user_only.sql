@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS flats (
   flat_type VARCHAR(20),
   status VARCHAR(20) DEFAULT 'vacant',
   user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  assigned_at TIMESTAMP NULL,
   is_deleted BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -51,6 +52,9 @@ CREATE TABLE IF NOT EXISTS monthly_records (
   month INTEGER CHECK (month BETWEEN 1 AND 12),
   year INTEGER,
   amount INTEGER,
+  owner_name TEXT,
+  owner_email TEXT,
+  owner_phone TEXT,
   status VARCHAR(20) DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 

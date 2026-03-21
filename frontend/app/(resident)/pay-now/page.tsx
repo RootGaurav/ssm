@@ -26,17 +26,28 @@ interface ReceiptData {
 
 export default function PayNow() {
   const [pending, setPending] = useState<any[]>([])
+  const [hasAssignedFlat, setHasAssignedFlat] = useState(true)
   const [loading, setLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
+  const [pageMessage, setPageMessage] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<PaymentData | null>(null)
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null)
   const [showReceipt, setShowReceipt] = useState(false)
 
   async function load() {
-    const data = await getSubscriptions()
-    const onlyPending = data.filter((s: any) => s.status === "pending")
+    const result = await getSubscriptions()
+
+    if (result.error) {
+      setErrorMessage(result.error)
+      return
+    }
+
+    setHasAssignedFlat(result.hasAssignedFlat !== false)
+    setPageMessage(result.message || "")
+
+    const onlyPending = (result.subscriptions || []).filter((s: any) => s.status === "pending")
     setPending(onlyPending)
   }
 
@@ -179,6 +190,22 @@ export default function PayNow() {
     window.URL.revokeObjectURL(url)
   }
 
+  if (!hasAssignedFlat && !showReceipt) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+        <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 max-w-4xl mx-auto">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+            <h1 className="text-2xl font-bold text-amber-900 mb-2">No Flat Assigned</h1>
+            <p className="text-amber-800">{pageMessage || "No flat is currently assigned to your account."}</p>
+            <p className="mt-2 text-sm text-amber-700">
+              Once a flat is assigned, pending dues will appear here for payment.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (pending.length === 0 && !showReceipt) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -191,6 +218,9 @@ export default function PayNow() {
             </div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">No Pending Payments 🎉</h1>
             <p className="text-gray-600">All your subscriptions are up to date. Great job!</p>
+            {errorMessage && (
+              <p className="mt-4 text-sm text-red-600">{errorMessage}</p>
+            )}
           </div>
         </div>
       </div>

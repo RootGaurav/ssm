@@ -7,18 +7,57 @@ import Link from "next/link"
 export default function Subscriptions(){
 
   const [data,setData] = useState<any[]>([])
+  const [hasAssignedFlat, setHasAssignedFlat] = useState(true)
+  const [message, setMessage] = useState("")
+  const [error, setError] = useState("")
 
   async function load(){
 
     const result = await getSubscriptions()
 
-    setData(result)
+    if (result.error) {
+      setError(result.error)
+      return
+    }
+
+    setHasAssignedFlat(result.hasAssignedFlat !== false)
+    setMessage(result.message || "")
+    setData(result.subscriptions || [])
 
   }
 
   useEffect(()=>{
     load()
   },[])
+
+  if(error){
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+        <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 max-w-6xl mx-auto">
+          <div className="text-center py-12">
+            <p className="text-lg font-semibold text-red-600 mb-2">Unable to load subscriptions</p>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if(!hasAssignedFlat){
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+        <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 max-w-6xl mx-auto">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+            <h1 className="text-2xl font-bold text-amber-900 mb-2">No Flat Assigned</h1>
+            <p className="text-amber-800">{message || "No flat is currently assigned to your account."}</p>
+            <p className="mt-2 text-sm text-amber-700">
+              Your subscription history will appear here once an admin assigns a flat.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if(!data || data.length === 0){
     return (

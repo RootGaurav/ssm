@@ -59,7 +59,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
         </thead>
         <tbody>
           {paginatedFlats.map((flat:any, index:number)=>(
-            <tr key={flat.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+            <tr key={flat.id} className={`hover:bg-gray-100 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.flat_number}</td>
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.owner_name}</td>
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.owner_email}</td>
@@ -136,7 +136,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
           >
             Previous
           </button>
-          
+
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}

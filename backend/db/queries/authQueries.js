@@ -1,18 +1,41 @@
 const pool = require("../db")
 
+const syncUsersSequence = async (client) => {
+  await client.query(
+    `
+    SELECT setval(
+      pg_get_serial_sequence('users', 'id'),
+      COALESCE((SELECT MAX(id) FROM users), 0) + 1,
+      false
+    )
+    `
+  )
+}
+
 async function createUser(name, email, password, phone) {
+  const client = await pool.connect()
 
-  const query = `
-    INSERT INTO users(name,email,password,phone,role)
-    VALUES($1,$2,$3,$4,'resident')
-    RETURNING id,name,email,role
-  `
+  try {
+    await client.query("BEGIN")
+    await syncUsersSequence(client)
 
-  const values = [name, email, password, phone]
+    const query = `
+      INSERT INTO users(name,email,password,phone,role)
+      VALUES($1,$2,$3,$4,'resident')
+      RETURNING id,name,email,role
+    `
 
-  const result = await pool.query(query, values)
+    const values = [name, email, password, phone]
+    const result = await client.query(query, values)
 
-  return result.rows[0]
+    await client.query("COMMIT")
+    return result.rows[0]
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 }
 
 async function findUserByEmail(email) {

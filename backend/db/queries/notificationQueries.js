@@ -1,5 +1,17 @@
 const pool = require("../db")
 
+const syncNotificationsSequence = async (client) => {
+  await client.query(
+    `
+    SELECT setval(
+      pg_get_serial_sequence('notifications', 'id'),
+      COALESCE((SELECT MAX(id) FROM notifications), 0) + 1,
+      false
+    )
+    `
+  )
+}
+
 // GET ALL NOTIFICATIONS
 const getNotifications = async () => {
 
@@ -22,24 +34,36 @@ const getNotifications = async () => {
 const createNotification = async (data) => {
 
   const { title, message, target_type, flat_id, user_id } = data
+  const client = await pool.connect()
 
-  const result = await pool.query(
-    `
-    INSERT INTO notifications
-    (title, message, target_type, flat_id, user_id)
-    VALUES ($1,$2,$3,$4,$5)
-    RETURNING *
-    `,
-    [
-      title,
-      message,
-      target_type,
-      flat_id || null,
-      user_id || null
-    ]
-  )
+  try {
+    await client.query("BEGIN")
+    await syncNotificationsSequence(client)
 
-  return result.rows[0]
+    const result = await client.query(
+      `
+      INSERT INTO notifications
+      (title, message, target_type, flat_id, user_id)
+      VALUES ($1,$2,$3,$4,$5)
+      RETURNING *
+      `,
+      [
+        title,
+        message,
+        target_type,
+        flat_id || null,
+        user_id || null
+      ]
+    )
+
+    await client.query("COMMIT")
+    return result.rows[0]
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 
 }
 

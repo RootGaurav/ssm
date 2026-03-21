@@ -6,14 +6,18 @@ import { getResidentDashboard } from "@/services/api"
 export default function ResidentDashboard(){
 
   const [data,setData] = useState<any>(null)
+  const [error,setError] = useState("")
 
   async function loadDashboard(){
 
     const result = await getResidentDashboard()
 
-    if(!result.error){
-      setData(result)
+    if(result.error){
+      setError(result.error)
+      return
     }
+
+    setData(result)
 
   }
 
@@ -25,10 +29,19 @@ export default function ResidentDashboard(){
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
         <div className="bg-white p-10 rounded-2xl shadow-xl border border-gray-200 max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="text-gray-600">Loading dashboard...</p>
-          </div>
+          {error ? (
+            <div className="text-center">
+              <p className="text-lg font-semibold text-red-600 mb-2">
+                Unable to load dashboard
+              </p>
+              <p className="text-gray-600">{error}</p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="text-gray-600">Loading dashboard...</p>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -52,6 +65,29 @@ export default function ResidentDashboard(){
 
         </div>
 
+        {!data.hasAssignedFlat && (
+          <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-xl bg-amber-100 p-3">
+                <svg className="h-6 w-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-amber-900">
+                  No flat assigned
+                </h2>
+                <p className="mt-1 text-sm text-amber-800">
+                  {data.message || "No flat is currently assigned to your account."}
+                </p>
+                <p className="mt-2 text-sm text-amber-700">
+                  Once an admin assigns a flat, your dues and payment history will appear here.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* STATUS CARDS */}
 
@@ -69,12 +105,16 @@ export default function ResidentDashboard(){
               </h2>
             </div>
             <p className={`text-2xl font-bold ${
-              data.currentMonth?.status === "paid"
+              !data.hasAssignedFlat
+                ? "text-gray-500"
+                : data.currentMonth?.status === "paid"
                 ? "text-green-600"
                 : "text-red-600"
             }`}>
 
-              {data.currentMonth?.status?.toUpperCase() || "N/A"}
+              {data.hasAssignedFlat
+                ? data.currentMonth?.status?.toUpperCase() || "N/A"
+                : "NOT ASSIGNED"}
 
             </p>
           </div>
@@ -93,7 +133,7 @@ export default function ResidentDashboard(){
             </div>
             <p className="text-2xl font-bold text-red-600">
 
-              ₹{data.pendingAmount || 0}
+              ₹{data.hasAssignedFlat ? data.pendingAmount || 0 : 0}
 
             </p>
           </div>

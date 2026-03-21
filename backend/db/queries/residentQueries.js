@@ -1,5 +1,17 @@
 const pool = require("../db")
 
+const syncUsersSequence = async (client) => {
+  await client.query(
+    `
+    SELECT setval(
+      pg_get_serial_sequence('users', 'id'),
+      COALESCE((SELECT MAX(id) FROM users), 0) + 1,
+      false
+    )
+    `
+  )
+}
+
 // GET ALL RESIDENTS
 // Keep `flat_id` in response for frontend compatibility (first assigned flat)
 const getAllResidents = async () => {
@@ -40,6 +52,7 @@ const createResident = async (resident) => {
 
   try {
     await client.query("BEGIN")
+    await syncUsersSequence(client)
 
     const result = await client.query(
       `
@@ -58,7 +71,8 @@ const createResident = async (resident) => {
             owner_email = $2,
             phone = $3,
             status = 'occupied',
-            user_id = $4
+            user_id = $4,
+            assigned_at = NOW()
         WHERE id = $5
         `,
         [name, email, phone, result.rows[0].id, flat_id]
@@ -124,7 +138,8 @@ const updateResident = async (id, resident) => {
             owner_email = $2,
             phone = $3,
             status = 'occupied',
-            user_id = $4
+            user_id = $4,
+            assigned_at = NOW()
         WHERE id = $5
         `,
         [name, email, phone, id, flat_id]
@@ -155,7 +170,8 @@ const deleteResident = async (id) => {
           owner_email = NULL,
           phone = NULL,
           status = 'vacant',
-          user_id = NULL
+          user_id = NULL,
+          assigned_at = NULL
       WHERE user_id = $1
       `,
       [id]
@@ -193,7 +209,8 @@ const assignResidentToFlat = async (residentId, flatId) => {
         owner_email = $2,
         phone = $3,
         status = 'occupied',
-        user_id = $4
+        user_id = $4,
+        assigned_at = NOW()
     WHERE id = $5
     `,
     [name, email, phone, residentId, flatId]
@@ -209,7 +226,8 @@ const vacateFlat = async (flatId) => {
         owner_email = NULL,
         phone = NULL,
         status = 'vacant',
-        user_id = NULL
+        user_id = NULL,
+        assigned_at = NULL
     WHERE id = $1
     `,
     [flatId]

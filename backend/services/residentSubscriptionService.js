@@ -8,11 +8,21 @@ const getSubscriptions = async (userId) => {
     [userId]
   )
 
-  if(flats.rows.length === 0){
-    throw new Error("User not assigned to flat")
+  if (flats.rows.length === 0) {
+    return {
+      hasAssignedFlat: false,
+      message: "No flat is currently assigned to your account.",
+      subscriptions: []
+    }
   }
 
-  return await queries.getSubscriptions(userId)
+  const subscriptions = await queries.getSubscriptions(userId)
+
+  return {
+    hasAssignedFlat: true,
+    message: null,
+    subscriptions
+  }
 }
 
 
@@ -23,11 +33,21 @@ const getSubscriptionDetail = async (userId, year, month, flatId = null) => {
     [userId]
   )
 
-  if(flats.rows.length === 0){
-    throw new Error("User not assigned to flat")
+  if (flats.rows.length === 0) {
+    return {
+      hasAssignedFlat: false,
+      message: "No flat is currently assigned to your account.",
+      subscription: null
+    }
   }
 
-  return await queries.getSubscriptionDetail(userId, year, month, flatId)
+  const subscription = await queries.getSubscriptionDetail(userId, year, month, flatId)
+
+  return {
+    hasAssignedFlat: true,
+    message: subscription ? null : "Subscription details were not found for this period.",
+    subscription
+  }
 }
 
 module.exports = {

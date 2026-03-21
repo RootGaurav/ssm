@@ -31,7 +31,8 @@ const getAllFlats = async () => {
         f.phone,
         f.owner_name,
         f.owner_email,
-        f.user_id
+        f.user_id,
+        f.assigned_at
      FROM flats f
      WHERE f.is_deleted = false
      ORDER BY f.flat_number`
@@ -64,8 +65,8 @@ const createFlat = async (flat) => {
     if (owner_email === "NA" || !owner_email) {
       const result = await client.query(
         `INSERT INTO flats
-        (flat_number, owner_name, owner_email, phone, flat_type, status, user_id)
-        VALUES ($1,$2,$3,$4,$5,$6,NULL)
+        (flat_number, owner_name, owner_email, phone, flat_type, status, user_id, assigned_at)
+        VALUES ($1,$2,$3,$4,$5,$6,NULL,NULL)
         RETURNING *`,
         [
           normalizedFlatNumber,
@@ -119,8 +120,8 @@ const createFlat = async (flat) => {
 
     const result = await client.query(
       `INSERT INTO flats
-      (flat_number, owner_name, owner_email, phone, flat_type, user_id, status)
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      (flat_number, owner_name, owner_email, phone, flat_type, user_id, status, assigned_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
       RETURNING *`,
       [flat_number, owner_name, owner_email, phone, flat_type, userId, "occupied"]
     )
@@ -187,6 +188,11 @@ const updateFlat = async (id, flat) => {
          phone=$4::text,
          flat_type=$5::text,
          user_id=$6::int,
+         assigned_at = CASE
+           WHEN $6::int IS NULL THEN NULL
+           WHEN user_id IS DISTINCT FROM $6::int OR status != 'occupied' THEN NOW()
+           ELSE assigned_at
+         END,
          status = CASE
            WHEN $6::int IS NOT NULL THEN 'occupied'
            WHEN COALESCE($3::text, '') NOT IN ('', 'NA') THEN 'occupied'
@@ -229,7 +235,8 @@ const deleteFlat = async (id) => {
          owner_name = NULL,
          owner_email = NULL,
          phone = NULL,
-         user_id = NULL
+         user_id = NULL,
+         assigned_at = NULL
      WHERE id = $1`,
     [id]
   )

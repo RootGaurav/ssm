@@ -23,6 +23,8 @@ const getSubscriptions = async (userId) => {
       ON f.id = mr.flat_id
     WHERE f.user_id = $1
       AND f.is_deleted = false
+      AND f.assigned_at IS NOT NULL
+      AND MAKE_DATE(mr.year, mr.month, 1) >= f.assigned_at::date
     ORDER BY mr.year DESC, mr.month DESC
     `,
     [userId]
@@ -57,6 +59,8 @@ const getSubscriptionDetail = async (userId, year, month, flatId = null) => {
       ON f.id = mr.flat_id
     WHERE f.user_id = $1
       AND f.is_deleted = false
+      AND f.assigned_at IS NOT NULL
+      AND MAKE_DATE(mr.year, mr.month, 1) >= f.assigned_at::date
       AND mr.year = $2
       AND mr.month = $3
       AND ($4::int IS NULL OR mr.flat_id = $4::int)

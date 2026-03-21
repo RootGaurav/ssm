@@ -18,16 +18,26 @@ const getResidentDashboard = async (userId) => {
 
   const flatIds = flatsResult.rows.map((row) => row.flat_id)
 
-  if(flatIds.length === 0){
-    throw new Error("Resident not assigned to a flat")
+  if (flatIds.length === 0) {
+    const notifications = await queries.getNotifications([], userId)
+
+    return {
+      hasAssignedFlat: false,
+      message: "No flat is currently assigned to your account.",
+      currentMonth: null,
+      pendingAmount: 0,
+      recentPayments: [],
+      notifications
+    }
   }
 
-  const status = await queries.getCurrentMonthStatus(flatIds)
-  const pending = await queries.getPendingAmount(flatIds)
-  const payments = await queries.getRecentPayments(flatIds)
+  const status = await queries.getCurrentMonthStatus(userId)
+  const pending = await queries.getPendingAmount(userId)
+  const payments = await queries.getRecentPayments(userId)
   const notifications = await queries.getNotifications(flatIds,userId)
 
   return {
+    hasAssignedFlat: true,
     currentMonth: status,
     pendingAmount: pending.pending_amount,
     recentPayments: payments,

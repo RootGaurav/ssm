@@ -12,6 +12,18 @@ const syncPaymentsSequence = async (client) => {
   )
 }
 
+// const syncMonthlyRecordsSequence = async (client) => {
+//   await client.query(
+//     `
+//     SELECT setval(
+//       pg_get_serial_sequence('monthly_records', 'id'),
+//       COALESCE((SELECT MAX(id) FROM monthly_records), 0) + 1,
+//       false
+//     )
+//     `
+//   )
+// }
+
 // GET RECORDS BY MONTH + YEAR
 const getMonthlyRecords = async (month, year) => {
 
@@ -21,9 +33,9 @@ const getMonthlyRecords = async (month, year) => {
       mr.id,
       f.id AS flat_id,
       f.flat_number,
-      f.owner_name,
-      f.owner_email,
-      f.phone AS owner_phone,
+      COALESCE(mr.owner_name, f.owner_name) AS owner_name,
+      COALESCE(mr.owner_email, f.owner_email) AS owner_email,
+      COALESCE(mr.owner_phone, f.phone) AS owner_phone,
       mr.month,
       mr.year,
       mr.amount,
@@ -33,7 +45,6 @@ const getMonthlyRecords = async (month, year) => {
     WHERE mr.month = $1
     AND mr.year = $2
     AND f.is_deleted = false
-    AND f.status = 'occupied'
     ORDER BY f.flat_number
     `,
     [month, year]
@@ -45,26 +56,52 @@ const getMonthlyRecords = async (month, year) => {
 
 // GENERATE RECORDS FOR ALL FLATS
 const generateMonthlyRecords = async (month, year) => {
+  const client = await pool.connect()
 
-  const result = await pool.query(
-    `
-    INSERT INTO monthly_records (flat_id, month, year, amount)
-    SELECT 
-      f.id,
-      $1,
-      $2,
-      sp.monthly_amount
-    FROM flats f
-    JOIN subscription_plans sp
-      ON sp.flat_type = f.flat_type
-    WHERE f.is_deleted = false
-    ON CONFLICT (flat_id, month, year) DO NOTHING
-    RETURNING *
-    `,
-    [month, year]
-  )
+  try {
+    await client.query("BEGIN")
+    //await syncMonthlyRecordsSequence(client)
 
-  return result.rows
+    const result = await client.query(
+      `
+      INSERT INTO monthly_records (
+        flat_id,
+        month,
+        year,
+        amount,
+        owner_name,
+        owner_email,
+        owner_phone
+      )
+      SELECT 
+        f.id,
+        $1,
+        $2,
+        sp.monthly_amount,
+        f.owner_name,
+        f.owner_email,
+        f.phone
+      FROM flats f
+      JOIN subscription_plans sp
+        ON sp.flat_type = f.flat_type
+      WHERE f.is_deleted = false
+        AND f.status = 'occupied'
+        AND f.assigned_at IS NOT NULL
+        AND f.assigned_at <= MAKE_DATE($2::int, $1::int, 1)
+      ON CONFLICT (flat_id, month, year) DO NOTHING
+      RETURNING *
+      `,
+      [month, year]
+    )
+
+    await client.query("COMMIT")
+    return result.rows
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 }
 
 
@@ -77,7 +114,7 @@ const updateMonthlyRecord = async (id, status) => {
 
     const existing = await client.query(
       `
-      SELECT id, flat_id, month, year, amount
+      SELECT id, flat_id, month, year, amount, status
       FROM monthly_records
       WHERE id = $1
       FOR UPDATE
@@ -91,6 +128,11 @@ const updateMonthlyRecord = async (id, status) => {
     }
 
     const record = existing.rows[0]
+
+    if (record.status === "paid") {
+      await client.query("ROLLBACK")
+      return record
+    }
 
     const result = await client.query(
       `
