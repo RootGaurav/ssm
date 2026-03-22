@@ -9,7 +9,8 @@ const getMonthlyReport = async () => {
       year,
       SUM(amount) AS total_collection,
       COUNT(*) FILTER (WHERE payment_mode='cash') AS cash_payments,
-      COUNT(*) FILTER (WHERE payment_mode='upi') AS upi_payments
+      COUNT(*) FILTER (WHERE payment_mode='upi') AS upi_payments,
+      COUNT(*) FILTER (WHERE payment_mode='online') AS online_payments
     FROM payments
     WHERE status='success'
     GROUP BY month, year

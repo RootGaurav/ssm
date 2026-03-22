@@ -1,5 +1,6 @@
 
-const API_URL = "http://localhost:5000/api"
+// const API_URL = "http://192.168.0.124:5000/api"
+const API_URL = "http://localhost:5000/api" 
 
 function getAuthToken() {
   if (typeof document === "undefined") return ""
@@ -356,6 +357,18 @@ export async function getPaymentsByFlat(flatId:number){
 
 }
 
+export async function getPendingMonthlyRecordsByFlat(flatId:number){
+
+  const res = await fetch(`${API_URL}/payments/pending-records/${flatId}`,{
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
+    }
+  })
+
+  return res.json()
+
+}
+
 // REPORTS
 
 export async function getMonthlyReport(){
@@ -430,23 +443,23 @@ export async function createNotification(data:any){
 }
 
 
-export async function sendNotification(data:any){
+// export async function sendNotification(data:any){
 
-  const res = await fetch(
-    `${API_URL}/notifications`,
-    {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-      Authorization:`Bearer ${getAuthToken()}`
-    },
-      body:JSON.stringify(data)
-    }
-  )
+//   const res = await fetch(
+//     `${API_URL}/notifications`,
+//     {
+//       method:"POST",
+//       headers:{
+//         "Content-Type":"application/json",
+//       Authorization:`Bearer ${getAuthToken()}`
+//     },
+//       body:JSON.stringify(data)
+//     }
+//   )
 
-  return res.json()
+//   return res.json()
 
-}
+// }
 
 
 

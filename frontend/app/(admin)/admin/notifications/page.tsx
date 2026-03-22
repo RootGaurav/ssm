@@ -30,13 +30,13 @@ export default function NotificationsPage(){
 
   async function loadData(){
 
-    const n = await getNotifications()
-    const f = await getFlats()
-    const r = await getResidents()
+    const notifications = await getNotifications()
+    const flats = await getFlats()
+    const residents = await getResidents()
 
-    if(Array.isArray(n)) setNotifications(n)
-    if(Array.isArray(f)) setFlats(f)
-    if(Array.isArray(r)) setResidents(r)
+    if(Array.isArray(notifications)) setNotifications(notifications)
+    if(Array.isArray(flats)) setFlats(flats)
+    if(Array.isArray(residents)) setResidents(residents)
 
   }
 
@@ -190,7 +190,7 @@ export default function NotificationsPage(){
 
 
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg"
           >
             Send Notification
           </button>

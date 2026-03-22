@@ -51,6 +51,26 @@ const getPaymentsByFlat = async (req, res) => {
 
 }
 
+const getPendingMonthlyRecordsByFlat = async (req, res) => {
+
+  try {
+
+    const records = await paymentService.getPendingMonthlyRecordsByFlat(
+      req.params.flatId
+    )
+
+    res.json(records)
+
+  } catch (error) {
+
+    res.status(400).json({
+      error: error.message
+    })
+
+  }
+
+}
+
 
 
 
@@ -96,5 +116,6 @@ const paySubscription = async (req,res)=>{
 module.exports = {
   createOfflinePayment,
   getPaymentsByFlat,
+  getPendingMonthlyRecordsByFlat,
   paySubscription
 }

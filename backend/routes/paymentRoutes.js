@@ -14,6 +14,13 @@ router.post(
 )
 
 router.get(
+  "/pending-records/:flatId",
+  authMiddleware,
+  adminMiddleware,
+  paymentController.getPendingMonthlyRecordsByFlat
+)
+
+router.get(
   "/:flatId",
   authMiddleware,
   adminMiddleware,

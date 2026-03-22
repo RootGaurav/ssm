@@ -86,6 +86,21 @@ const getPaymentsByFlat = async (flatId) => {
 
 }
 
+const getPendingMonthlyRecordsByFlat = async (flatId) => {
+  const result = await pool.query(
+    `
+    SELECT id, month, year, amount, status
+    FROM monthly_records
+    WHERE flat_id = $1
+      AND status = 'pending'
+    ORDER BY year DESC, month DESC
+    `,
+    [flatId]
+  )
+
+  return result.rows
+}
+
 const createPayment = async (flatId, month, year, amount) => {
   const client = await pool.connect()
 
@@ -135,5 +150,6 @@ module.exports = {
   createPayment,
   markSubscriptionPaid,
   createOfflinePayment,
-  getPaymentsByFlat
+  getPaymentsByFlat,
+  getPendingMonthlyRecordsByFlat
 }

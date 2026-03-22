@@ -27,6 +27,16 @@ const getPaymentsByFlat = async (flatId) => {
 
 }
 
+const getPendingMonthlyRecordsByFlat = async (flatId) => {
+
+  if (!flatId) {
+    throw new Error("Flat ID required")
+  }
+
+  return await paymentQueries.getPendingMonthlyRecordsByFlat(flatId)
+
+}
+
 
 
 
@@ -107,5 +117,6 @@ const paySubscription = async (userId, month, year, flatId) => {
 module.exports = {
   createOfflinePayment,
   getPaymentsByFlat,
-    paySubscription
+  getPendingMonthlyRecordsByFlat,
+  paySubscription
 }

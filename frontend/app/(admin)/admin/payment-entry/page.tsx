@@ -1,47 +1,73 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createOfflinePayment, getFlats } from "@/services/api"
+import { createOfflinePayment, getFlats, getPendingMonthlyRecordsByFlat } from "@/services/api"
 
-export default function PaymentEntryPage(){
+export default function PaymentEntryPage() {
 
-  const [flats,setFlats] = useState<any[]>([])
-  const [success,setSuccess] = useState(false)
-  const [error,setError] = useState("")
+  const [flats, setFlats] = useState<any[]>([])
+  const [pendingRecords, setPendingRecords] = useState<any[]>([])
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState("")
   const [selectedFlatDetails, setSelectedFlatDetails] = useState<any>(null)
 
-  const [form,setForm] = useState({
-    flat_id:"",
-    month:"",
-    year:new Date().getFullYear(),
-    amount:"",
-    payment_mode:"cash"
+  const [form, setForm] = useState({
+    flat_id: "",
+    month: "",
+    year: new Date().getFullYear(),
+    amount: "",
+    payment_mode: "cash"
   })
 
+  async function loadPendingRecords(flatId: string) {
+    if (!flatId) {
+      setPendingRecords([])
+      return
+    }
 
-  async function loadFlats(){
+    const records = await getPendingMonthlyRecordsByFlat(Number(flatId))
+
+    if (Array.isArray(records)) {
+      setPendingRecords(records)
+      return
+    }
+
+    setPendingRecords([])
+  }
+
+
+  async function loadFlats() {
 
     const data = await getFlats()
 
-    if(Array.isArray(data)){
+    if (Array.isArray(data)) {
       setFlats(data)
     }
 
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     loadFlats()
-  },[])
+  }, [])
 
 
 
-  async function handleSubmit(e:any){
+  async function handleSubmit(e: any) {
 
     e.preventDefault()
+    if (!form.month.includes("-")) {
+      setError("Invalid month selected")
+      return
+    }
+    const [month, year] = form.month.split("-")
 
-    const result = await createOfflinePayment(form)
+    const result = await createOfflinePayment({
+      ...form,
+      month: Number(month),
+      year: Number(year)
+    })
 
-    if(result.error){
+    if (result.error) {
       setError(result.error)
       setTimeout(() => setError(""), 5000)
       return
@@ -51,18 +77,20 @@ export default function PaymentEntryPage(){
     setTimeout(() => setSuccess(false), 5000)
 
     setForm({
-      flat_id:"",
-      month:"",
-      year:new Date().getFullYear(),
-      amount:"",
-      payment_mode:"cash"
+      flat_id: "",
+      month: "",
+      year: new Date().getFullYear(),
+      amount: "",
+      payment_mode: "cash"
     })
+    setSelectedFlatDetails(null)
+    setPendingRecords([])
 
   }
 
 
 
-  return(
+  return (
 
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
 
@@ -108,16 +136,22 @@ export default function PaymentEntryPage(){
             <select
               className="w-full text-black border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               value={form.flat_id}
-              onChange={(e)=>{
+              onChange={async (e) => {
                 const flatId = e.target.value
-                setForm({...form,flat_id:flatId})
-                const selected = flats.find((f:any) => String(f.id) === flatId)
+                setForm({
+                  ...form,
+                  flat_id: flatId,
+                  month: "",
+                  amount: ""
+                })
+                const selected = flats.find((f: any) => String(f.id) === flatId)
                 setSelectedFlatDetails(selected)
+                await loadPendingRecords(flatId)
               }}
               required
             >
               <option value="">Select Flat</option>
-              {flats.filter((f:any) => f.status === "occupied").map((f:any)=>(
+              {flats.filter((f: any) => f.status === "occupied").map((f: any) => (
                 <option key={f.id} value={f.id}>
                   {f.flat_number}
                 </option>
@@ -151,11 +185,10 @@ export default function PaymentEntryPage(){
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>
-                  <span className={`font-medium px-2 py-1 rounded text-xs ${
-                    selectedFlatDetails.status === "occupied"
+                  <span className={`font-medium px-2 py-1 rounded text-xs ${selectedFlatDetails.status === "occupied"
                       ? "bg-green-100 text-green-800"
                       : "bg-yellow-100 text-yellow-800"
-                  }`}>
+                    }`}>
                     {selectedFlatDetails.status?.toUpperCase() || "N/A"}
                   </span>
                 </div>
@@ -166,17 +199,38 @@ export default function PaymentEntryPage(){
 
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Month (1-12)</label>
-            <input
-              type="number"
-              min="1"
-              max="12"
-              placeholder="Enter month"
-              className="w-full text-black placeholder:text-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+            <label className="block text-gray-700 font-medium mb-2">Pending Billing Month</label>
+            <select
+              className="w-full text-black border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               value={form.month}
-              onChange={(e)=>setForm({...form,month:e.target.value})}
+              onChange={(e) => {
+                const selectedRecord = pendingRecords.find(
+                  (record: any) => `${record.month}-${record.year}` === e.target.value
+                )
+
+                setForm(prev => ({
+                  ...prev,
+                  month: selectedRecord ? `${selectedRecord.month}-${selectedRecord.year}` : "",
+                  year: selectedRecord ? selectedRecord.year : new Date().getFullYear(),
+                  amount: selectedRecord ? String(selectedRecord.amount) : ""
+                }))
+              }}
               required
-            />
+              disabled={!form.flat_id || pendingRecords.length === 0}
+            >
+              <option value="">
+                {form.flat_id
+                  ? pendingRecords.length > 0
+                    ? "Select pending month"
+                    : "No pending months for this flat"
+                  : "Select flat first"}
+              </option>
+              {pendingRecords.map((record: any) => (
+                <option key={record.id} value={`${record.month}-${record.year}`}>
+                  {record.month}/{record.year}
+                </option>
+              ))}
+            </select>
           </div>
 
 
@@ -184,10 +238,10 @@ export default function PaymentEntryPage(){
             <label className="block text-gray-700 font-medium mb-2">Year</label>
             <input
               type="number"
-              placeholder="Enter year"
+              placeholder="Auto-filled from pending record"
               className="w-full text-black placeholder:text-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               value={form.year}
-              onChange={(e)=>setForm({...form,year:Number(e.target.value)})}
+              readOnly
               required
             />
           </div>
@@ -199,10 +253,10 @@ export default function PaymentEntryPage(){
               type="number"
               min="0"
               step="0.01"
-              placeholder="Enter amount"
+              placeholder="Auto-filled from pending record"
               className="w-full text-black placeholder:text-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               value={form.amount}
-              onChange={(e)=>setForm({...form,amount:e.target.value})}
+              readOnly
               required
             />
           </div>
@@ -213,7 +267,7 @@ export default function PaymentEntryPage(){
             <select
               className="w-full text-black border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               value={form.payment_mode}
-              onChange={(e)=>setForm({...form,payment_mode:e.target.value})}
+              onChange={(e) => setForm({ ...form, payment_mode: e.target.value })}
             >
               <option value="cash">Cash</option>
               <option value="upi">UPI</option>
@@ -224,7 +278,8 @@ export default function PaymentEntryPage(){
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 shadow-md mt-6"
+            disabled={!form.flat_id || !form.month || pendingRecords.length === 0}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition duration-200 shadow-md mt-6"
           >
             Record Payment
           </button>

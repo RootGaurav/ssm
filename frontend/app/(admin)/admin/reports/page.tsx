@@ -178,6 +178,9 @@ export default function ReportsPage(){
                   <th className="p-4 text-left font-semibold text-gray-700">Total</th>
                   <th className="p-4 text-left font-semibold text-gray-700">Cash</th>
                   <th className="p-4 text-left font-semibold text-gray-700">UPI</th>
+                  <th className="p-4 text-left font-semibold text-gray-700">Online</th>
+
+
                 </tr>
               </thead>
               <tbody>
@@ -195,6 +198,7 @@ export default function ReportsPage(){
                       <td className="p-4 text-gray-800">₹{Number(r.total_collection)}</td>
                       <td className="p-4 text-gray-800">{r.cash_payments}</td>
                       <td className="p-4 text-gray-800">{r.upi_payments}</td>
+                      <td className="p-4 text-gray-800">{r.online_payments}</td>
                     </tr>
                   ))
                 )}
