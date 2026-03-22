@@ -20,7 +20,7 @@ export default function AdminNavbar({ userName, onMenuClick }: AdminNavbarProps)
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <h2 className="font-bold text-gray-800 text-lg sm:text-xl truncate">
+        <h2 className="font-serif font-bold text-gray-800 text-xl sm:text-2xl truncate tracking-tight">
           Admin Panel
         </h2>
       </div>

@@ -37,20 +37,20 @@ export default function AdminLogin(){
 
   return(
 
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
 
-      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-lg">
+      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
 
-        <h1 className="text-2xl text-black font-bold text-center mb-2">
+        <h1 className="text-2xl font-bold text-gray-800 text-center mb-2">
           Admin Login
         </h1>
 
         <p className="text-gray-500 text-center mb-6">
-          Society Management Panel
+          Access the society management dashboard
         </p>
 
         {error && (
-          <p className="text-red-500 text-sm mb-4">
+          <p className="text-red-500 text-sm mb-4 text-center">
             {error}
           </p>
         )}
@@ -59,22 +59,22 @@ export default function AdminLogin(){
 
           <input
             type="email"
-            placeholder="Admin Email"
-            className="w-full text-black border placeholder:text-gray-500 p-3 rounded focus:ring-2 focus:ring-gray-700"
+            placeholder="Enter admin email"
+            className="w-full text-black border border-gray-300 placeholder:text-gray-500 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
             onChange={(e)=>setEmail(e.target.value)}
             required
           />
 
           <input
             type="password"
-            placeholder="Password"
-            className="w-full text-black placeholder:text-gray-500 border p-3 rounded focus:ring-2 focus:ring-gray-700"
+            placeholder="Enter password"
+            className="w-full text-black placeholder:text-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
             onChange={(e)=>setPassword(e.target.value)}
             required
           />
 
           <button
-            className="w-full bg-gray-900 text-white py-3 rounded hover:bg-black transition"
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition"
           >
             Login
           </button>

@@ -29,7 +29,7 @@ export default function ResidentLayout({
   }, [])
 
   return (
-    <div className="h-screen overflow-hidden flex bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="h-screen overflow-hidden flex bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
       {/* Desktop Sidebar */}
       {loggedIn && <ResidentSidebar userName={residentName} className="hidden lg:block" />}
 
@@ -68,7 +68,9 @@ export default function ResidentLayout({
                   </svg>
                 </button>
               )}
-              <h1 className="text-base sm:text-xl font-bold text-green-600 truncate">Society Portal - {residentName}</h1>
+              <h1 className="font-serif text-lg sm:text-2xl font-bold text-green-700 truncate tracking-tight">
+                Society Portal - {residentName}
+              </h1>
             </div>
 
             {loggedIn && (
