@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getSubscriptions, paySubscription, getRazorpayKey } from "@/services/api"
+import { getSubscriptions, paySubscription } from "@/services/api"
 
 interface PaymentData {
   flat_id: number
