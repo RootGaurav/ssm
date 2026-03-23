@@ -49,7 +49,33 @@ async function login(req, res) {
 
 }
 
+async function googleResidentLogin(req, res) {
+
+  try {
+
+    const { idToken } = req.body
+
+    const user = await authService.loginResidentWithGoogle(idToken)
+
+    const token = generateToken(user)
+
+    res.json({
+      user,
+      token
+    })
+
+  } catch (error) {
+
+    res.status(401).json({
+      error: error.message
+    })
+
+  }
+
+}
+
 module.exports = {
   register,
-  login
+  login,
+  googleResidentLogin
 }

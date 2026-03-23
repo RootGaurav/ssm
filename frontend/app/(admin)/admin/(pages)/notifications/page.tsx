@@ -24,6 +24,7 @@ export default function NotificationsPage(){
   })
 
   const [success,setSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const [error,setError] = useState("")
 
 
@@ -64,8 +65,19 @@ export default function NotificationsPage(){
       return
     }
 
+    const emailSummary = result.emailSummary
+    const summaryMessage = emailSummary
+      ? emailSummary.configured
+        ? `Notification sent. Emails sent: ${emailSummary.sent}/${emailSummary.attempted}.`
+        : `Notification saved. Email sending skipped because email service is not configured.`
+      : "Notification sent successfully"
+
+    setSuccessMessage(summaryMessage)
     setSuccess(true)
-    setTimeout(()=>setSuccess(false),4000)
+    setTimeout(()=>{
+      setSuccess(false)
+      setSuccessMessage("")
+    },4000)
 
     setForm({
       title:"",
@@ -94,7 +106,7 @@ export default function NotificationsPage(){
 
         {success && (
           <div className="bg-green-500 text-white p-3 rounded">
-            Notification sent successfully
+            {successMessage}
           </div>
         )}
 

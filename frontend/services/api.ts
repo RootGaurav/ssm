@@ -40,6 +40,34 @@ export async function login(data: any) {
 
 }
 
+export async function loginResidentWithGoogle(idToken: string) {
+
+  try {
+
+    const res = await fetch(`${API_URL}/auth/google/resident`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ idToken })
+    })
+
+    const result = await res.json()
+
+    if (!res.ok) {
+      return { error: result.error || "Google login failed" }
+    }
+
+    return result
+
+  } catch (error) {
+
+    return { error: "Server error. Please try again." }
+
+  }
+
+}
+
 
 export async function register(data: any) {
 

@@ -59,10 +59,10 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
         </thead>
         <tbody>
           {paginatedFlats.map((flat:any, index:number)=>(
-            <tr key={flat.id} className={`hover:bg-gray-100 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+            <tr key={flat.id} className={`hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.flat_number}</td>
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.owner_name}</td>
-              <td className="border-b border-gray-200 p-4 text-gray-900">{flat.owner_email}</td>
+              <td className="border-b border-gray-200 p-4 text-gray-900 max-w-s truncate">{flat.owner_email}</td>
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.phone}</td>
                 
                 
@@ -87,7 +87,7 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
               
               <td className="border-b border-gray-200 p-4 text-gray-900">{flat.flat_type}</td>
               <td className="border-b border-gray-200 p-4">
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap sm:flex-nowrap">
                   <button
                     onClick={()=>onEdit(flat)}
                     className="text-green-600 hover:text-green-800 font-medium transition"
@@ -136,7 +136,6 @@ export default function FlatsTable({flats,onEdit,onVacate,onAssign,onDelete}:any
           >
             Previous
           </button>
-
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}

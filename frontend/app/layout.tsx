@@ -26,12 +26,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <script
- src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"
- async
-></script>
-      </head>
       <body className={`${dmSans.variable} ${playfair.variable} font-sans`}>{children}</body>
     </html>
   );

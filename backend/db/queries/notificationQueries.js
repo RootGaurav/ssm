@@ -67,7 +67,56 @@ const createNotification = async (data) => {
 
 }
 
+const getEmailsForAllResidents = async () => {
+  const result = await pool.query(
+    `
+    SELECT email
+    FROM users
+    WHERE role = 'resident'
+      AND email IS NOT NULL
+      AND TRIM(email) <> ''
+    `
+  )
+
+  return result.rows.map((row) => row.email)
+}
+
+const getEmailsForFlat = async (flatId) => {
+  const result = await pool.query(
+    `
+    SELECT COALESCE(u.email, f.owner_email) AS email
+    FROM flats f
+    LEFT JOIN users u ON u.id = f.user_id
+    WHERE f.id = $1
+    `,
+    [flatId]
+  )
+
+  return result.rows
+    .map((row) => row.email)
+    .filter(Boolean)
+}
+
+const getEmailsForResident = async (userId) => {
+  const result = await pool.query(
+    `
+    SELECT email
+    FROM users
+    WHERE id = $1
+      AND role = 'resident'
+      AND email IS NOT NULL
+      AND TRIM(email) <> ''
+    `,
+    [userId]
+  )
+
+  return result.rows.map((row) => row.email)
+}
+
 module.exports = {
   getNotifications,
-  createNotification
+  createNotification,
+  getEmailsForAllResidents,
+  getEmailsForFlat,
+  getEmailsForResident,
 }

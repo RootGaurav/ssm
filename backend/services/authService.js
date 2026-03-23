@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt")
 const authQueries = require("../db/queries/authQueries")
+const verifyGoogleIdToken = require("../utils/verifyGoogleIdToken")
 
 async function registerUser(data) {
 
@@ -41,7 +42,37 @@ async function loginUser(email, password) {
   return user
 }
 
+async function loginResidentWithGoogle(idToken) {
+  const payload = await verifyGoogleIdToken(idToken)
+  const email = String(payload.email).toLowerCase()
+
+  let user = await authQueries.findUserByEmail(email)
+
+  if (user) {
+    if (user.role !== "resident") {
+      throw new Error("Google sign-in is only available for resident accounts")
+    }
+
+    return user
+  }
+
+  const generatedPasswordHash = await bcrypt.hash(
+    `google:${payload.sub}`,
+    10
+  )
+
+  user = await authQueries.createUser(
+    payload.name || email.split("@")[0],
+    email,
+    generatedPasswordHash,
+    null
+  )
+
+  return user
+}
+
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  loginResidentWithGoogle
 }
